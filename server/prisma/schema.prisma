@@ -23,19 +23,60 @@ enum Role {
   customer
 }
 
+enum City {
+  Jakarta
+  Bandung
+  Surabaya
+}
+
 model User {
-  id            Int      @id @default(autoincrement())
-  name          String
-  username      String
-  birth_date    DateTime
-  address       String
-  gender        Gender
-  email         String
-  password      String
-  image_profile Bytes    @db.LongBlob
-  role          Role
-  referral_code String
-  point_balance Int
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  id             Int       @id @default(autoincrement())
+  name           String
+  username       String
+  birth_date     DateTime?
+  address        String?
+  gender         Gender?
+  email          String
+  password       String
+  image_profile  Bytes?    @db.LongBlob
+  phone          BigInt
+  role           Role?
+  referral_code  String?
+  reference_code String?
+  point_balance  Int?
+  expired_point  Int?
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  voucherId Int?
+  Voucher   Voucher[]
+  Event     Event[]
+}
+
+model Event {
+  id              Int      @id @default(autoincrement())
+  name            String
+  schedule        DateTime
+  start_event     DateTime
+  end_event       DateTime
+  city            City
+  location        String
+  address         String
+  description     String
+  terms_condition String
+  image           Bytes    @db.LongBlob
+  user            User     @relation(fields: [userId], references: [id])
+  userId          Int
+}
+
+model Category {
+  id Int @id @default(autoincrement())
+}
+
+model Voucher {
+  id           Int      @id @default(autoincrement())
+  user         User     @relation(fields: [userId], references: [id])
+  voucher      Int
+  expired_date DateTime
+  userId       Int
 }
