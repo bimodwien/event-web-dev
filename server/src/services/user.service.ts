@@ -63,13 +63,13 @@ class UserService {
 
       if (referenceCode) console.log(referenceCode);
 
-      const isReferralCodeExisted = await prisma.user.findFirst({
+      const isReferenceCodeExisted = await prisma.user.findFirst({
         where: {
           referralCode: referenceCode,
         },
       });
 
-      if (!isReferralCodeExisted) {
+      if (!isReferenceCodeExisted) {
         throw new Error("Invalid Referral Code");
       }
       // Prisma.UserScalarFieldEnum.
@@ -85,7 +85,7 @@ class UserService {
       const newUser = await prisma.user.create({
         data,
       });
-      if (isReferralCodeExisted) {
+      if (isReferenceCodeExisted) {
         await prisma.voucher.create({
           data: {
             ammount: 10,
@@ -95,11 +95,11 @@ class UserService {
 
         await prisma.user.update({
           data: {
-            point: isReferralCodeExisted.point + 10000,
+            point: isReferenceCodeExisted.point + 10000,
             pointExpiredDate,
           },
           where: {
-            id: isReferralCodeExisted.id,
+            id: isReferenceCodeExisted.id,
           },
         });
       }
