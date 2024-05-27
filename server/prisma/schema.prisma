@@ -19,7 +19,7 @@ enum Gender {
 }
 
 enum Role {
-  event_organizer
+  eventOrganizer
   customer
 }
 
@@ -30,27 +30,25 @@ enum City {
 }
 
 model User {
-  id             Int       @id @default(autoincrement())
-  name           String
-  username       String
-  birth_date     DateTime?
-  address        String?
-  gender         Gender?
-  email          String
-  password       String
-  image_profile  Bytes?    @db.LongBlob
-  phone          BigInt
-  role           Role?
-  referral_code  String?
-  reference_code String?
-  point_balance  Int?
-  expired_point  Int?
-
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
-  voucherId Int?
-  Voucher   Voucher[]
-  Event     Event[]
+  id               Int       @id @default(autoincrement())
+  name             String
+  username         String
+  birthDate        DateTime?
+  address          String?
+  gender           Gender?
+  email            String
+  password         String
+  image_profile    Bytes?    @db.LongBlob
+  phone            BigInt?
+  isVerified       Boolean?  @default(false)
+  role             Role?
+  referralCode     String
+  usedReferralCode String?
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+  voucherId        Int?
+  Vouchers         Voucher[]
+  Events           Event[]
 }
 
 model Event {
@@ -74,9 +72,10 @@ model Category {
 }
 
 model Voucher {
-  id           Int      @id @default(autoincrement())
-  user         User     @relation(fields: [userId], references: [id])
-  voucher      Int
-  expired_date DateTime
-  userId       Int
+  id          Int      @id @default(autoincrement())
+  user        User     @relation(fields: [userId], references: [id])
+  ammount     Int
+  isUsed      Boolean  @default(false)
+  expiredDate DateTime
+  userId      Int
 }
