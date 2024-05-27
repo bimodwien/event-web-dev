@@ -18,6 +18,10 @@ class UserController {
 
   static async login(req: Request, res: Response, next: NextFunction) {
     try {
+      const data = await UserService.loginService(req);
+      res.status(200).send({
+        data,
+      });
     } catch (error) {
       next(error);
     }
