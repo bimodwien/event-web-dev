@@ -38,6 +38,8 @@ model User {
   gender           Gender?
   email            String
   password         String
+  point            Int       @default(0)
+  pointExpiredDate DateTime  @default(now())
   image_profile    Bytes?    @db.LongBlob
   phone            BigInt?
   isVerified       Boolean?  @default(false)
@@ -62,9 +64,10 @@ model Event {
   address         String
   description     String
   terms_condition String
-  image           Bytes    @db.LongBlob
-  user            User     @relation(fields: [userId], references: [id])
-  userId          Int
+
+  image  Bytes @db.LongBlob
+  user   User  @relation(fields: [userId], references: [id])
+  userId Int
 }
 
 model Category {
@@ -72,10 +75,9 @@ model Category {
 }
 
 model Voucher {
-  id          Int      @id @default(autoincrement())
-  user        User     @relation(fields: [userId], references: [id])
-  ammount     Int
-  isUsed      Boolean  @default(false)
-  expiredDate DateTime
-  userId      Int
+  id      Int     @id @default(autoincrement())
+  user    User    @relation(fields: [userId], references: [id])
+  ammount Int
+  isUsed  Boolean @default(false)
+  userId  Int
 }
