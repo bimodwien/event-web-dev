@@ -8,7 +8,7 @@ const PORT = process.env.PORT || 8000;
 const SECRET_KEY = process.env.SECRET_KEY || "";
 
 const corsOption: CorsOptions = {
-  origin: `http://localhost:3000`,
+  origin: `http://localhost:3001`,
   credentials: true,
 };
 

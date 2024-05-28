@@ -3,8 +3,12 @@ import React from "react";
 import YupPassword from "yup-password";
 import * as Yup from "yup";
 import { useFormik } from "formik";
+import { axiosInstance } from "@/lib/axios";
+import { useRouter } from "next/router";
 
 const ComponentRegister = () => {
+  // const router = useRouter();
+
   YupPassword(Yup);
   const initialValues = {
     email: "",
@@ -12,9 +16,30 @@ const ComponentRegister = () => {
     name: "",
     password: "",
     role: "",
+    referenceCode: "",
   };
 
-  //   const formik = useFormik({});
+  const formik = useFormik({
+    initialValues,
+    validationSchema: Yup.object().shape({
+      email: Yup.string().required().email("Invalid email format"),
+      username: Yup.string().required(),
+      name: Yup.string().required(),
+      password: Yup.string().required(),
+      role: Yup.string().required(),
+      referenceCode: Yup.string(),
+    }),
+    onSubmit: async (values) => {
+      try {
+        console.log("bisa ehehe");
+        axiosInstance().post("/v1", values);
+        // router.push("/login");
+        alert("User berhasil Register");
+      } catch (error) {
+        console.log(error);
+      }
+    },
+  });
 
   return (
     <>
@@ -31,7 +56,10 @@ const ComponentRegister = () => {
               <h1 className="text-xl font-bold leading-tight tracking-tight text-gray-900 md:text-2xl">
                 Create an account
               </h1>
-              <form action="" className="space-y-4 md:space-y-6">
+              <form
+                onSubmit={formik.handleSubmit}
+                className="space-y-4 md:space-y-6"
+              >
                 <div>
                   <label
                     htmlFor=""
@@ -41,10 +69,11 @@ const ComponentRegister = () => {
                   </label>
                   <input
                     type="text"
-                    name=""
-                    id=""
+                    id="email"
                     className="bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5"
                     placeholder="Insert Your Email Here..."
+                    {...formik.getFieldProps("email")}
+                    required
                   />
                 </div>
                 <div>
@@ -56,10 +85,11 @@ const ComponentRegister = () => {
                   </label>
                   <input
                     type="text"
-                    name=""
-                    id=""
+                    id="username"
                     className="bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5"
-                    placeholder="Insert Your Username Here..."
+                    placeholder="Insert your username here..."
+                    {...formik.getFieldProps("username")}
+                    required
                   />
                 </div>
                 <div>
@@ -71,10 +101,11 @@ const ComponentRegister = () => {
                   </label>
                   <input
                     type="text"
-                    name=""
-                    id=""
+                    id="name"
                     className="bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5"
-                    placeholder="Insert Your Full Name Here..."
+                    placeholder="Insert your full name here..."
+                    {...formik.getFieldProps("name")}
+                    required
                   />
                 </div>
                 <div>
@@ -86,10 +117,26 @@ const ComponentRegister = () => {
                   </label>
                   <input
                     type="password"
-                    name=""
-                    id=""
+                    id="password"
                     className="bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5"
-                    placeholder="Insert Your Password Here..."
+                    placeholder="Insert your password here..."
+                    {...formik.getFieldProps("password")}
+                    required
+                  />
+                </div>
+                <div>
+                  <label
+                    htmlFor=""
+                    className="block mb-2 text-md font-medium text-gray-900"
+                  >
+                    Reference Code
+                  </label>
+                  <input
+                    type="text"
+                    id="referenceCode"
+                    className="bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5"
+                    placeholder="Insert your reference Code here..."
+                    {...formik.getFieldProps("referenceCode")}
                   />
                 </div>
                 <div>
@@ -104,8 +151,12 @@ const ComponentRegister = () => {
                       <div className="flex items-center gap-2">
                         <input
                           type="checkbox"
-                          name=""
-                          id=""
+                          name="role"
+                          value="eventOrganizer"
+                          checked={formik.values.role === "eventOrganizer"}
+                          onChange={(e) => {
+                            formik.setFieldValue("role", e.target.value);
+                          }}
                           className="w-4 h-4 border border-gray-300 rounded bg-gray-50 focus:ring-3 focus:ring-primary-300"
                         />
                         <div>
@@ -117,8 +168,12 @@ const ComponentRegister = () => {
                       <div className="flex items-center gap-2">
                         <input
                           type="checkbox"
-                          name=""
-                          id=""
+                          name="customer"
+                          value="customer"
+                          checked={formik.values.role === "customer"}
+                          onChange={(e) => {
+                            formik.setFieldValue("role", e.target.value);
+                          }}
                           className="w-4 h-4 border border-gray-300 rounded bg-gray-50 focus:ring-3 focus:ring-primary-300"
                         />
                         <div>

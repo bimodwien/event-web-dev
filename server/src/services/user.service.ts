@@ -69,9 +69,9 @@ class UserService {
         },
       });
 
-      if (!isReferenceCodeExisted) {
-        throw new Error("Invalid Referral Code");
-      }
+      // if (!isReferenceCodeExisted) {
+      //   throw new Error("Invalid Referral Code");
+      // }
       // Prisma.UserScalarFieldEnum.
       const data: Prisma.UserCreateInput = {
         email,
