@@ -19,9 +19,10 @@ class UserController {
   static async login(req: Request, res: Response, next: NextFunction) {
     try {
       const data = await UserService.loginService(req);
-      res.status(200).send({
-        data,
-      });
+      res
+        .status(200)
+        .cookie("access_token", data)
+        .send({ message: "login success" });
     } catch (error) {
       next(error);
     }

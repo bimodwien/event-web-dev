@@ -28,7 +28,9 @@ class UserService {
     if (!checkUser) throw new Error("Wrong Password");
     delete user.password;
 
-    return createToken(user, "1d");
+    const token = createToken(user, "1h");
+
+    return token;
   }
 
   static async registerService(req: Request) {
