@@ -10,6 +10,7 @@ const routerUser = Router();
 routerUser.post("/v1", blobUploader().single("image"), UserController.register);
 routerUser.post("/v2", UserController.login);
 routerUser.get("/v3", validateRefreshToken, UserController.validateUser);
+routerUser.patch("/v4", UserController.verifiedUser);
 routerUser.get("/avatar/:id", UserController.renderAvatar);
 
 export default routerUser;

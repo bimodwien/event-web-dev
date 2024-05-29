@@ -15,7 +15,7 @@ const transporter = nodemailer.createTransport({
 
 export async function sendEmail(
   emailTo: string,
-  templateDir: string,
+  templateDir: any,
   href: string,
   subject: string
 ) {

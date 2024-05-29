@@ -119,13 +119,11 @@ class UserService {
     });
   }
 
-  //register> email
-  // register > login > check isverfied?
-
   static async emailVerification(req: Request) {
-    const token = req.params.token;
+    const token =
+      req.headers.authorization?.replace("Bearer ", "").toString() || "";
     const { id } = verify(token, SECRET_KEY) as TUser;
-    await prisma.user.update({
+    const data = await prisma.user.update({
       where: {
         id: Number(id),
       },
@@ -133,6 +131,8 @@ class UserService {
         isVerified: true,
       },
     });
+
+    return data;
   }
 
   static async render(req: Request) {

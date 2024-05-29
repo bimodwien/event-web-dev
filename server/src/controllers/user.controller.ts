@@ -40,6 +40,19 @@ class UserController {
     }
   }
 
+  static async verifiedUser(req: Request, res: Response, next: NextFunction) {
+    try {
+      console.log("masuk");
+
+      const data = await UserService.emailVerification(req);
+      res.send({
+        data,
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
   static async validateUser(req: Request, res: Response, next: NextFunction) {
     try {
       const access_token = await UserService.validate(req);
