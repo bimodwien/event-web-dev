@@ -32,7 +32,7 @@ const ComponentRegister = () => {
     onSubmit: async (values) => {
       try {
         console.log("bisa ehehe");
-        axiosInstance().post("/v1", values);
+        axiosInstance().post("/users/v1", values);
         // router.push("/login");
         alert("User berhasil Register");
       } catch (error) {

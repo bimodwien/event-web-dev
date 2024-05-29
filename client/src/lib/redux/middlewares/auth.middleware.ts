@@ -9,7 +9,7 @@ export const userLogin = ({ username, password }: TUser) => {
   return async (dispatch: Dispatch) => {
     try {
       await axiosInstance().post(
-        "/v2",
+        "/users/v2",
         {
           username,
           password,

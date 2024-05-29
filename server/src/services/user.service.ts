@@ -5,8 +5,11 @@ import prisma from "../lib/prisma";
 import { comparePassword, hashPassword } from "../lib/bcrypt";
 import { $Enums, Prisma } from "@prisma/client";
 import { TUser } from "../models/user.model";
+import { sendEmail } from "../lib/nodemailer";
 import { createToken } from "../lib/jwt";
 import { randomBytes } from "crypto";
+import { verify } from "jsonwebtoken";
+import { SECRET_KEY } from "../config";
 
 class UserService {
   static async loginService(req: Request) {
@@ -20,6 +23,9 @@ class UserService {
         username: true,
         email: true,
         password: true,
+        address: true,
+        referralCode: true,
+        point: true,
       },
     })) as TUser;
     if (!user?.password) throw new Error("Wrong email or password");
@@ -28,9 +34,10 @@ class UserService {
     if (!checkUser) throw new Error("Wrong Password");
     delete user.password;
 
-    const token = createToken(user, "1h");
+    const access_token = createToken({ user, type: "access-token" }, "15m");
+    const refresh_token = createToken({ user, type: "refresh-token" }, "1hr");
 
-    return token;
+    return { access_token, refresh_token };
   }
 
   static async registerService(req: Request) {
@@ -71,10 +78,6 @@ class UserService {
         },
       });
 
-      // if (!isReferenceCodeExisted) {
-      //   throw new Error("Invalid Referral Code");
-      // }
-      // Prisma.UserScalarFieldEnum.
       const data: Prisma.UserCreateInput = {
         email,
         password: hashed,
@@ -105,7 +108,63 @@ class UserService {
           },
         });
       }
+
+      const verifyToken = createToken({ id: newUser.id }, "1hr");
+      sendEmail(
+        String(newUser.email),
+        "../templates/verification.html",
+        `http://localhost:3001/verification/${verifyToken}`,
+        "Thank you for registering, please verify your email"
+      );
     });
+  }
+
+  //register> email
+  // register > login > check isverfied?
+
+  static async emailVerification(req: Request) {
+    const token = req.params.token;
+    const { id } = verify(token, SECRET_KEY) as TUser;
+    await prisma.user.update({
+      where: {
+        id: Number(id),
+      },
+      data: {
+        isVerified: true,
+      },
+    });
+  }
+
+  static async render(req: Request) {
+    const data = await prisma.user.findUnique({
+      where: {
+        id: Number(req.params.id),
+      },
+    });
+    return data?.imageProfile;
+  }
+
+  static async validate(req: Request) {
+    const user = await prisma.user.findUnique({
+      select: {
+        id: true,
+        email: true,
+        isVerified: true,
+        name: true,
+        username: true,
+      },
+      where: {
+        id: req.user.id,
+      },
+    });
+
+    return createToken(
+      {
+        user,
+        type: "access-token",
+      },
+      "15m"
+    );
   }
 }
 

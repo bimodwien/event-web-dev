@@ -10,4 +10,5 @@ export type TUser = {
   role?: string;
   referralCode?: string;
   referenceCode?: string;
+  isVerified?: boolean;
 };

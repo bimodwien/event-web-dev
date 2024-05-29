@@ -12,4 +12,7 @@ const corsOption: CorsOptions = {
   credentials: true,
 };
 
-export { PORT, corsOption, SECRET_KEY };
+const NODEMAILER_EMAIL = process.env.EMAIL || "";
+const NODEMAILER_PASSWORD = process.env.PASSWORD || "";
+
+export { PORT, corsOption, SECRET_KEY, NODEMAILER_EMAIL, NODEMAILER_PASSWORD };

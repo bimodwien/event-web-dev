@@ -15,7 +15,7 @@ app.get("/", (req: Request, res: Response) => {
   res.send("Welcome to API!!");
 });
 
-app.use("/", routerUser);
+app.use("/users", routerUser);
 
 app.use((error: unknown, req: Request, res: Response, next: NextFunction) => {
   if (error instanceof Error) {

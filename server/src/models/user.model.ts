@@ -9,10 +9,15 @@ export type TUser = {
   gender?: string;
   email?: string;
   password?: string;
-  imageProfile?: string;
+  imageProfile?: Buffer;
   role?: string;
   referralCode?: string;
   referenceCode?: string;
-  point_balance?: number;
+  pointBalance?: number;
   pointExpiry?: Date;
+};
+
+export type TDecode = {
+  type: string;
+  user: TUser;
 };
