@@ -1,14 +1,15 @@
 "use client";
-import React from "react";
+import React, { useState } from "react";
 import YupPassword from "yup-password";
 import * as Yup from "yup";
 import { useFormik } from "formik";
 import { axiosInstance } from "@/lib/axios";
-import { useRouter } from "next/router";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 
 const ComponentRegister = () => {
-  // const router = useRouter();
+  const router = useRouter();
+  const [isEventOrganizer, setEventOrganizer] = useState(false);
 
   YupPassword(Yup);
   const initialValues = {
@@ -34,8 +35,8 @@ const ComponentRegister = () => {
       try {
         console.log("bisa ehehe");
         axiosInstance().post("/users/v1", values);
-        // router.push("/login");
         alert("User berhasil Register");
+        router.push("/login");
       } catch (error) {
         console.log(error);
       }
@@ -125,21 +126,24 @@ const ComponentRegister = () => {
                     required
                   />
                 </div>
-                <div>
-                  <label
-                    htmlFor=""
-                    className="block mb-2 text-md font-medium text-gray-900"
-                  >
-                    Reference Code
-                  </label>
-                  <input
-                    type="text"
-                    id="referenceCode"
-                    className="bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5"
-                    placeholder="Insert your reference Code here..."
-                    {...formik.getFieldProps("referenceCode")}
-                  />
-                </div>
+                {!isEventOrganizer && (
+                  <div>
+                    <label
+                      htmlFor=""
+                      className="block mb-2 text-md font-medium text-gray-900"
+                    >
+                      Reference Code
+                    </label>
+                    <input
+                      type="text"
+                      id="referenceCode"
+                      className="bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5"
+                      placeholder="Insert your reference Code here..."
+                      {...formik.getFieldProps("referenceCode")}
+                    />
+                  </div>
+                )}
+
                 <div>
                   <label
                     htmlFor=""
@@ -156,7 +160,12 @@ const ComponentRegister = () => {
                           value="eventOrganizer"
                           checked={formik.values.role === "eventOrganizer"}
                           onChange={(e) => {
-                            formik.setFieldValue("role", e.target.value);
+                            const isChecked = e.target.checked;
+                            formik.setFieldValue(
+                              "role",
+                              isChecked ? "eventOrganizer" : ""
+                            );
+                            setEventOrganizer(isChecked);
                           }}
                           className="w-4 h-4 border border-gray-300 rounded bg-gray-50 focus:ring-3 focus:ring-primary-300"
                         />
@@ -173,7 +182,12 @@ const ComponentRegister = () => {
                           value="customer"
                           checked={formik.values.role === "customer"}
                           onChange={(e) => {
-                            formik.setFieldValue("role", e.target.value);
+                            const isChecked = e.target.checked;
+                            formik.setFieldValue(
+                              "role",
+                              isChecked ? "customer" : ""
+                            );
+                            setEventOrganizer(false);
                           }}
                           className="w-4 h-4 border border-gray-300 rounded bg-gray-50 focus:ring-3 focus:ring-primary-300"
                         />

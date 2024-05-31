@@ -37,10 +37,10 @@ export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
   const isCustomer = decode?.user.role === "customer" ? true : false;
 
-  console.log("-----", decode?.user.username);
-  console.log("<<<<<", decode?.user.role);
+  // console.log("-----", decode?.user.username);
+  // console.log("<<<<<", decode?.user.role);
 
-  console.log(">>>>>", isCustomer);
+  // console.log(">>>>>", isCustomer);
 
   // akses login / register klo seller login & verif => /dashboard
   if (
