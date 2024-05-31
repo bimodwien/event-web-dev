@@ -3,7 +3,7 @@ import { PayloadAction, createSlice } from "@reduxjs/toolkit";
 import { deleteCookie } from "cookies-next";
 
 const initialUser = {
-  id: 0,
+  id: "",
   email: "",
   username: "",
   password: "",

@@ -126,7 +126,7 @@ class UserService {
     const { id } = verify(token, SECRET_KEY) as TUser;
     const data = await prisma.user.update({
       where: {
-        id: Number(id),
+        id: id,
       },
       data: {
         isVerified: true,
@@ -139,7 +139,7 @@ class UserService {
   static async render(req: Request) {
     const data = await prisma.user.findUnique({
       where: {
-        id: Number(req.params.id),
+        id: req.params.id,
       },
     });
     return data?.imageProfile;

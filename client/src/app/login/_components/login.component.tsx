@@ -8,6 +8,7 @@ import { useRouter } from "next/navigation";
 import { TUser } from "@/models/user.model";
 import { useAppDispatch } from "@/lib/redux/hooks";
 import { userLogin } from "@/lib/redux/middlewares/auth.middleware";
+import Link from "next/link";
 
 const LoginForm = () => {
   const router = useRouter();
@@ -117,12 +118,12 @@ const LoginForm = () => {
                 </button>
                 <p className="text-sm font-light text-gray-500">
                   Don't have an account yet?{" "}
-                  <a
-                    href=""
+                  <Link
+                    href={"/register"}
                     className="font-medium text-primary-600 hover:underline"
                   >
                     Sign up
-                  </a>
+                  </Link>
                 </p>
               </form>
             </div>

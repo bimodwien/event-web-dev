@@ -1,7 +1,7 @@
 "use strict";
 
 export type TUser = {
-  id?: number;
+  id?: string;
   name?: string;
   username?: string;
   birthdate?: Date;

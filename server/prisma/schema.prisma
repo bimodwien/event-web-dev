@@ -23,14 +23,8 @@ enum Role {
   customer
 }
 
-enum City {
-  Jakarta
-  Bandung
-  Surabaya
-}
-
 model User {
-  id               Int       @id @default(autoincrement())
+  id               String        @id @default(cuid())
   name             String
   username         String
   birthDate        DateTime?
@@ -38,46 +32,165 @@ model User {
   gender           Gender?
   email            String
   password         String
-  point            Int       @default(0)
-  pointExpiredDate DateTime  @default(now())
-  imageProfile     Bytes?    @db.LongBlob
+  point            Int           @default(0)
+  pointExpiredDate DateTime      @default(now())
+  imageProfile     Bytes?        @db.LongBlob
   phone            BigInt?
-  isVerified       Boolean?  @default(false)
+  isVerified       Boolean?      @default(false)
   role             Role?
-  referralCode     String
+  referralCode     String        @unique
   usedReferralCode String?
-  createdAt        DateTime  @default(now())
-  updatedAt        DateTime  @updatedAt
-  voucherId        Int?
-  Vouchers         Voucher[]
-  Events           Event[]
-}
+  createdAt        DateTime      @default(now())
+  updatedAt        DateTime      @updatedAt
+  voucher          Voucher?
+  Event            Event[]
+  Transaction      Transaction[]
+  Review           Review[]
 
-model Event {
-  id              Int      @id @default(autoincrement())
-  name            String
-  schedule        DateTime
-  start_event     DateTime
-  end_event       DateTime
-  city            City
-  location        String
-  address         String
-  description     String
-  terms_condition String
-
-  image  Bytes @db.LongBlob
-  user   User  @relation(fields: [userId], references: [id])
-  userId Int
-}
-
-model Category {
-  id Int @id @default(autoincrement())
+  @@index([username, name, email])
+  @@map("users")
 }
 
 model Voucher {
-  id      Int     @id @default(autoincrement())
-  user    User    @relation(fields: [userId], references: [id])
-  ammount Int
-  isUsed  Boolean @default(false)
-  userId  Int
+  id        String   @id @default(cuid())
+  userId    String   @unique
+  user      User     @relation(fields: [userId], references: [id])
+  ammount   Int
+  isUsed    Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("referrals")
+}
+
+enum City {
+  Jakarta
+  Bandung
+  Surabaya
+  Medan
+  Semarang
+  Makassar
+  Palembang
+  Depok
+  Tangerang
+  Bekasi
+  Bogor
+  Malang
+  Yogyakarta
+  Solo
+  Bali
+}
+
+enum MaxBuy {
+  one   @map("1")
+  two   @map("2")
+  three @map("3")
+  four  @map("4")
+  five  @map("5")
+}
+
+enum Type {
+  free
+  paid
+}
+
+enum CategoryName {
+  Music
+  Exhibition
+  Workshop
+  Sport
+}
+
+enum PromoList {
+  five        @map("5%")
+  ten         @map("10%")
+  fifth_teen  @map("15%")
+  twenty      @map("20%")
+  twenty_five @map("25%")
+  forty       @map("40%")
+  fifty       @map("50%")
+}
+
+model Event {
+  id               String        @id @default(cuid())
+  userId           String
+  user             User          @relation(fields: [userId], references: [id])
+  title            String
+  city             City
+  location         String
+  address          String
+  start_event      DateTime
+  end_event        DateTime
+  description      String        @db.Text
+  terms_conditions String        @db.Text
+  image            Bytes         @db.LongBlob
+  category         CategoryName
+  type             Type
+  ticket_available Int
+  ticket_price     Float?        @db.Double
+  max_buy          MaxBuy
+  promotion        PromoList?
+  start_promo      DateTime?
+  end_promo        DateTime?
+  Transaction      Transaction[]
+  Review           Review[]
+  createdAt        DateTime      @default(now())
+  updatedAt        DateTime      @updatedAt
+
+  @@index([title])
+  @@map("events")
+}
+
+// model Promotion {
+//   id          String    @id @default(cuid())
+//   promo       PromoList
+//   start_promo DateTime
+//   end_promo   DateTime
+//   eventId     String
+//   event       Event     @relation(fields: [eventId], references: [id])
+//   userId      String
+//   user        User      @relation(fields: [userId], references: [id])
+//   createdAt   DateTime  @default(now())
+//   updatedAt   DateTime  @updatedAt
+
+//   @@map("promotions")
+// }
+
+enum Status {
+  unpaid
+  pending
+  paid
+}
+
+model Transaction {
+  id           String   @id @default(cuid())
+  event        Event    @relation(fields: [eventId], references: [id])
+  eventId      String
+  user         User     @relation(fields: [userId], references: [id])
+  userId       String
+  status       Status
+  paid_at      DateTime
+  paid_proof   Bytes    @db.Blob
+  ticketId     String
+  total_ticket Int
+  total_price  Float    @db.Double
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("transactions")
+}
+
+model Review {
+  id          String   @id @default(cuid())
+  user        User     @relation(fields: [userId], references: [id])
+  userId      String
+  event       Event    @relation(fields: [eventId], references: [id])
+  eventId     String
+  rating      Int
+  review_text String   @db.Text
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("reviews")
 }

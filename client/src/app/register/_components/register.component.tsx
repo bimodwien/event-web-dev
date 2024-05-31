@@ -5,6 +5,7 @@ import * as Yup from "yup";
 import { useFormik } from "formik";
 import { axiosInstance } from "@/lib/axios";
 import { useRouter } from "next/router";
+import Link from "next/link";
 
 const ComponentRegister = () => {
   // const router = useRouter();
@@ -193,12 +194,12 @@ const ComponentRegister = () => {
                 </button>
                 <p className="text-sm font-light text-gray-500">
                   Already have an account?{" "}
-                  <a
-                    href="#"
+                  <Link
+                    href={"/login"}
                     className="font-medium text-primary-600 hover:underline"
                   >
                     Login here
-                  </a>
+                  </Link>
                 </p>
               </form>
             </div>

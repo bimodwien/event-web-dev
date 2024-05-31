@@ -35,20 +35,52 @@ export async function middleware(request: NextRequest) {
     : undefined;
   const isVerfied = decode ? decode.user.isVerified : false;
   const { pathname } = request.nextUrl;
+  const isCustomer = decode?.user.role === "customer" ? true : false;
 
-  if ((pathname == "/login" || pathname == "/register") && isLogin) {
+  console.log("-----", decode?.user.username);
+  console.log("<<<<<", decode?.user.role);
+
+  console.log(">>>>>", isCustomer);
+
+  // akses login / register klo seller login & verif => /dashboard
+  if (
+    (pathname == "/login" || pathname == "/register") &&
+    isLogin &&
+    !isCustomer &&
+    isVerfied
+  ) {
+    return NextResponse.redirect(new URL("/dashboard", request.url));
+  }
+
+  // akses login / register klo buyer login & verif => home
+  else if (
+    (pathname == "/login" || pathname == "/register") &&
+    isLogin &&
+    isCustomer &&
+    isVerfied
+  )
     return NextResponse.redirect(new URL("/", request.url));
-  } else if ((pathname == "/" || pathname == "/verify-user") && !isLogin)
+  // akses home / dashboard / verif klo g login => /login
+  else if ((pathname == "/" || pathname == "/dashboard") && !isLogin)
     return NextResponse.redirect(new URL("/login", request.url));
-  else if (pathname == "/" && isLogin && !isVerfied)
-    return NextResponse.redirect(new URL("/verify-user", request.url));
-  else if (pathname == "/verify-user" && isLogin && isVerfied)
+  // akses home klo seller login => dashboard
+  else if (pathname == "/" && isLogin && isVerfied && !isCustomer)
+    return NextResponse.redirect(new URL("/dashboard", request.url));
+  // akses dashboard klo buyer login => home
+  else if (pathname == "/dashboard" && isLogin && isVerfied && isCustomer)
     return NextResponse.redirect(new URL("/", request.url));
+  // akses verif klo login, dh verif, seller => dashboard
+  else if (pathname == "/verify-user" && isLogin && isVerfied && !isCustomer)
+    return NextResponse.redirect(new URL("/dashboard", request.url));
+  // akses verif klo login, dh verif, buyer => home
+  else if (pathname == "/verify-user" && isLogin && isVerfied && isCustomer)
+    return NextResponse.redirect(new URL("/", request.url));
+  else if (pathname == "/verify-user" && !isLogin)
+    return NextResponse.redirect(new URL("/login", request.url));
 
   return response;
 }
 
-// See "Matching Paths" below to learn more
 export const config = {
-  matcher: ["/", "/login", "/register", "/verify-user"],
+  matcher: ["/", "/login", "/register", "/verify-user", "/dashboard"],
 };

@@ -1,9 +1,13 @@
 import React from "react";
 
-type Props = {};
+const dashboard = () => {
+  return (
+    <>
+      <main className="">
+        <h1>dashboard</h1>
+      </main>
+    </>
+  );
+};
 
-function Dasboard({}: Props) {
-  return <div>Dasboard</div>;
-}
-
-export default Dasboard;
+export default dashboard;
