@@ -26,6 +26,7 @@ class UserService {
         address: true,
         referralCode: true,
         point: true,
+        role: true,
       },
     })) as TUser;
     if (!user?.password) throw new Error("Wrong email or password");
@@ -152,6 +153,7 @@ class UserService {
         isVerified: true,
         name: true,
         username: true,
+        role: true,
       },
       where: {
         id: req.user.id,
