@@ -9,6 +9,7 @@ export default function ResponsiveNavWrapper({ children }: Props) {
   const isAuthPath: boolean =
     pathname === "/login" ||
     pathname === "/register" ||
+    pathname === "/reset-password" ||
     pathname === "/dashboard/create-event";
   return (
     <main>

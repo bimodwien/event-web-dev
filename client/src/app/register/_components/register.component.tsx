@@ -33,7 +33,6 @@ const ComponentRegister = () => {
     }),
     onSubmit: async (values) => {
       try {
-        console.log("bisa ehehe");
         axiosInstance().post("/users/v1", values);
         alert("User berhasil Register");
         router.push("/login");

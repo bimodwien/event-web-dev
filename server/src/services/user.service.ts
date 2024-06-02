@@ -136,6 +136,38 @@ class UserService {
     return data;
   }
 
+  static async requestResetPassword(req: Request) {
+    const email = req.body.email;
+
+    const user = await prisma.user.findFirst({
+      where: {
+        email,
+      },
+    });
+
+    if (!user) {
+      throw new Error("User not found");
+    }
+
+    const resetToken = createToken(
+      { userId: user.id, type: "reset-password" },
+      "1hr"
+    );
+
+    const resetLink = `http://localhost:3001/reset-token/${resetToken}`;
+    await sendEmail(
+      String(user.email),
+      "../template/reset-password.html",
+      resetLink,
+      "Please verify your email to reset password"
+    );
+    return { message: "Password email has been sent" };
+  }
+
+  static async resetPassword(req: Request) {
+    const token = req.body.token;
+  }
+
   static async render(req: Request) {
     const data = await prisma.user.findUnique({
       where: {

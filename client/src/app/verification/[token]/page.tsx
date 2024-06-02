@@ -1,10 +1,7 @@
 "use server";
 
 import { axiosInstance } from "@/lib/axios";
-import { url } from "inspector";
-import { cookies } from "next/headers";
-import { RedirectType, redirect } from "next/navigation";
-import { NextResponse } from "next/server";
+import { redirect } from "next/navigation";
 
 type Props = { params: { token: string } };
 
@@ -28,13 +25,6 @@ const Verification = ({ params }: Props) => {
         isError = true;
       });
     if (!isError) redirect("/");
-
-    //   .then((res) => {
-    //     redirect("/", RedirectType.replace);
-    //   })
-    //   .catch((err) => {
-    //     console.log(err);
-    //   });
   };
 
   return (
@@ -42,11 +32,9 @@ const Verification = ({ params }: Props) => {
       <div>Hello, Thanks for using Our Service</div>
       <div>
         Please verify your account{" "}
-        {/* <Link href={`http://localhost:8001/users/v4/${params.token}`}> */}
         <form action={verified}>
           <button type="submit">here</button>
         </form>
-        {/* </Link> */}
       </div>
     </>
   );

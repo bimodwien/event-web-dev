@@ -63,6 +63,17 @@ class UserController {
       next(error);
     }
   }
+
+  static async requestReset(req: Request, res: Response, next: NextFunction) {
+    try {
+      const response = await UserService.requestResetPassword(req);
+      res.send({
+        response,
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
 }
 
 export default UserController;

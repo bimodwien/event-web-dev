@@ -1,6 +1,6 @@
 import { Dispatch } from "@reduxjs/toolkit";
 import { axiosInstance } from "@/lib/axios";
-import { login, logout } from "../slices/user.slice";
+import { login } from "../slices/user.slice";
 import { TUser } from "@/models/user.model";
 import { deleteCookie, getCookie } from "cookies-next";
 import { jwtDecode } from "jwt-decode";
