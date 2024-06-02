@@ -158,7 +158,7 @@ class UserService {
     const resetToken = createToken({ userId: user.id }, "1hr");
 
     const resetLink = `http://localhost:3001/reset-token/${resetToken}`;
-    console.log("resetLink", resetLink);
+
     await sendEmail(
       String(user.email),
       "../templates/reset-password.html",
@@ -172,7 +172,6 @@ class UserService {
     const token =
       req.headers.authorization?.replace("Bearer ", "").toString() || "";
     const password: string = req.body.password;
-    console.log("params", { token, password });
     const { userId } = verify(token, SECRET_KEY) as { userId: string };
 
     const newPassword = await hashPassword(String(password));
@@ -195,8 +194,6 @@ class UserService {
         password: String(newPassword),
       },
     });
-
-    console.log("newPass", data.password, newPassword, userId);
 
     return data;
   }
