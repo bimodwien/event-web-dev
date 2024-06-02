@@ -1,25 +1,42 @@
-"use server";
+"use client";
 
 import React from "react";
 import * as Yup from "yup";
 import { useFormik } from "formik";
 import YupPassword from "yup-password";
+import { axiosInstance } from "@/lib/axios";
+import { useRouter } from "next/navigation";
 
 type Props = { params: { token: string } };
 
 function ResetToken({ params }: Props) {
+  console.log("<><><><><>");
+  const router = useRouter();
+
   YupPassword(Yup);
   const initialValues = {
     password: "",
   };
+
+  console.log("haii");
 
   const formik = useFormik({
     initialValues,
     validationSchema: Yup.object().shape({
       password: Yup.string().required(),
     }),
-    onSubmit: async (values) => {},
+    onSubmit: async (values) => {
+      await axiosInstance().post(`/users/v6`, values, {
+        headers: {
+          Authorization: "Bearer " + params.token,
+        },
+      });
+      console.log(values);
+      router.push("/login");
+    },
   });
+
+  console.log("formik", formik);
   return (
     <>
       <section className="bg-gray-50">
