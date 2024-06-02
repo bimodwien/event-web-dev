@@ -10,6 +10,7 @@ export default function ResponsiveNavWrapper({ children }: Props) {
     pathname === "/login" ||
     pathname === "/register" ||
     pathname === "/reset-password" ||
+    pathname === "/reset-token" ||
     pathname === "/dashboard/create-event";
   return (
     <main>
