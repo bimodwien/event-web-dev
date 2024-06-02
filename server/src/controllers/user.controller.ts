@@ -74,6 +74,17 @@ class UserController {
       next(error);
     }
   }
+
+  static async resetPassword(req: Request, res: Response, next: NextFunction) {
+    try {
+      const response = await UserService.resetPassword(req);
+      res.send({
+        response,
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
 }
 
 export default UserController;

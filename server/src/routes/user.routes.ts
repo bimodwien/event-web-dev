@@ -12,6 +12,7 @@ routerUser.post("/v2", UserController.login);
 routerUser.get("/v3", validateRefreshToken, UserController.validateUser);
 routerUser.patch("/v4", UserController.verifiedUser);
 routerUser.post("/v5", UserController.requestReset);
+routerUser.post("/v6", UserController.resetPassword);
 routerUser.get("/avatar/:id", UserController.renderAvatar);
 
 export default routerUser;
