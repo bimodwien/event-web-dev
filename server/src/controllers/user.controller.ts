@@ -1,7 +1,7 @@
 "use strict";
 
 import { NextFunction, Request, Response } from "express";
-import UserService from "../services/user.service";
+import { UserService, ValidationError } from "../services/user.service";
 
 class UserController {
   static async register(req: Request, res: Response, next: NextFunction) {
@@ -12,7 +12,18 @@ class UserController {
         data,
       });
     } catch (error) {
-      next(error);
+      if (error instanceof ValidationError) {
+        res.status(400).send({
+          message: "Registeration Failed",
+          error: error.message,
+        });
+      } else {
+        res.status(500).send({
+          message: "Registeration Failed",
+          error: "unexpected error",
+        });
+      }
+      // next(error);
     }
   }
 
@@ -76,6 +87,7 @@ class UserController {
   }
 
   static async resetPassword(req: Request, res: Response, next: NextFunction) {
+    console.log("controller ");
     try {
       const response = await UserService.resetPassword(req);
       res.send({
