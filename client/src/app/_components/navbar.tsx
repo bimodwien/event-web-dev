@@ -4,11 +4,19 @@ import React, { useEffect, useRef, useState } from "react";
 import { AiOutlineSearch } from "react-icons/ai";
 import Logout from "./logout";
 import { IoAdd } from "react-icons/io5";
+import Link from "next/link";
+import { useAppSelector } from "@/lib/redux/hooks";
 
 const Navbar = () => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const userPhotoRef = useRef<HTMLButtonElement>(null);
+
+  const user = useAppSelector((state) => state.auth);
+
+  useEffect(() => {
+    console.log(user);
+  }, [user]);
 
   const toggleDropdown = () => {
     setIsDropdownOpen((prev) => !prev);
@@ -89,20 +97,20 @@ const Navbar = () => {
             >
               <div className="px-4 py-3">
                 <span className="block text-sm text-gray-900 dark:text-white">
-                  Bonnie Green
+                  {user.username}
                 </span>
                 <span className="block text-xs text-gray-500 truncate dark:text-gray-400">
-                  name@mail.com
+                  {user.email}
                 </span>
               </div>
               <ul className="py-2 w-52">
                 <li>
-                  <a
-                    href="/edit-profile"
+                  <Link
+                    href={"/edit-profile"}
                     className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-gray-200 dark:hover:text-white"
                   >
                     Edit Profile
-                  </a>
+                  </Link>
                 </li>
                 <li>
                   <button className="block mx-3 mt-4 py-1 px-2 text-sm rounded bg-red-700 hover:bg-red-600 text-white">

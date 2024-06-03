@@ -97,6 +97,17 @@ class UserController {
       next(error);
     }
   }
+
+  static async editProfile(req: Request, res: Response, next: NextFunction) {
+    try {
+      const response = await UserService.edit(req);
+      res.status(201).send({
+        response,
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
 }
 
 export default UserController;

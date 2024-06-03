@@ -38,8 +38,10 @@ export function keepLogin() {
   return async function dispatch(dispatch: Dispatch) {
     try {
       const token = getCookie("access_token");
+      const decode = jwtDecode(token!) as { user: TUser };
+
       if (token) {
-        dispatch(login(jwtDecode(token)));
+        dispatch(login(decode?.user));
       }
     } catch (error) {
       console.log(error);

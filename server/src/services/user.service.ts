@@ -10,6 +10,7 @@ import { createToken } from "../lib/jwt";
 import { randomBytes } from "crypto";
 import { verify } from "jsonwebtoken";
 import { SECRET_KEY } from "../config";
+import sharp from "sharp";
 
 class ValidationError extends Error {
   constructor(message: string) {
@@ -229,6 +230,52 @@ class UserService {
       },
       "15m"
     );
+  }
+
+  static async edit(req: Request) {
+    const name: string = req.body.name;
+    const address: string = req.body.address;
+    const gender: string = req.body.gender;
+    const phone: string = req.body.phone;
+    const { file } = req;
+
+    const user = await prisma.user.findFirst({
+      where: {
+        id: req.user.id,
+      },
+    });
+
+    if (!user) {
+      throw new ValidationError("User not found");
+    }
+
+    const buffer = await sharp(req.file?.buffer).png().toBuffer();
+
+    if (!file) {
+      throw new ValidationError("No file uploaded");
+    }
+
+    const genders =
+      (gender === "male" && $Enums.Gender.male) ||
+      (gender === "female" && $Enums.Gender.female) ||
+      null;
+
+    const data: Prisma.UserUpdateInput = {
+      name,
+      address,
+      phone,
+      gender: genders,
+      imageProfile: buffer,
+    };
+
+    await prisma.user.update({
+      data,
+      where: {
+        id: String(user.id),
+      },
+    });
+
+    return { message: "user has been updated" };
   }
 }
 

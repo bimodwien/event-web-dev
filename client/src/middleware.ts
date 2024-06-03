@@ -37,11 +37,6 @@ export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
   const isCustomer = decode?.user.role === "customer" ? true : false;
 
-  // console.log("-----", decode?.user.username);
-  // console.log("<<<<<", decode?.user.role);
-
-  // console.log(">>>>>", isCustomer);
-
   // akses login / register klo seller login & verif => /dashboard
   if (
     (pathname == "/login" || pathname == "/register") &&
@@ -77,10 +72,20 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(new URL("/", request.url));
   else if (pathname == "/verify-user" && !isLogin)
     return NextResponse.redirect(new URL("/login", request.url));
+  // akses ke edit profile namun belum login
+  else if (pathname == "/edit-profile" && !isLogin)
+    return NextResponse.redirect(new URL("/login", request.url));
 
   return response;
 }
 
 export const config = {
-  matcher: ["/", "/login", "/register", "/verify-user", "/dashboard"],
+  matcher: [
+    "/",
+    "/login",
+    "/register",
+    "/verify-user",
+    "/dashboard",
+    "/edit-profile",
+  ],
 };

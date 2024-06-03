@@ -5,7 +5,11 @@ import { verify } from "jsonwebtoken";
 import { SECRET_KEY } from "../config";
 import { TDecode, TUser } from "../models/user.model";
 
-const validateToken = (req: Request, res: Response, next: NextFunction) => {
+export const validateToken = (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
   try {
     const token = req.headers.authorization?.replace("Bearer ", "");
     const decode = verify(token!, SECRET_KEY) as TDecode;
