@@ -1,22 +1,84 @@
 "use client";
-
+import React, { useEffect, useRef, useState } from "react";
 import { useAppSelector } from "@/lib/redux/hooks";
 import { Avatar } from "flowbite-react";
-import React from "react";
+import YupPassword from "yup-password";
+import * as Yup from "yup";
+import { useFormik } from "formik";
+import { axiosInstance } from "@/lib/axios";
+import { useRouter } from "next/navigation";
+import { TUser } from "../../../models/user.model";
 
-type Props = {};
-
-const EditComponent = (props: Props) => {
+const EditComponent = () => {
   const user = useAppSelector((state) => state.auth);
-  console.log(user);
+  // console.log(user);
+  const router = useRouter();
 
-  /* 
-  name
-  address
-  phone
-  gender
-  image profile
-  */
+  const imageProf = useRef<HTMLInputElement>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
+
+  // const [imagesProfile, setImagesProfile] = useState(user.imageProfile);
+  // const [names, setNames] = useState(user.name);
+  // const [addresses, setAddresses] = useState(user.address);
+  // const [phones, setPhones] = useState(user.phone);
+  // const [genders, setGenders] = useState(user.gender);
+
+  YupPassword(Yup);
+  const initialValues = {
+    imageProfile: user.imageProfile,
+    name: user.name,
+    address: user.address,
+    phone: user.phone,
+    gender: user.gender,
+  } as TUser;
+
+  const formik = useFormik({
+    initialValues,
+    validationSchema: Yup.object().shape({
+      name: Yup.string().required(),
+      address: Yup.string(),
+      phone: Yup.string(),
+      gender: Yup.string(),
+    }),
+    onSubmit: async (values) => {
+      try {
+        await axiosInstance().put("users/v7", values, {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        });
+        alert("User berhasil edit data");
+        router.push("/");
+      } catch (error) {
+        alert(error);
+      }
+    },
+  });
+
+  useEffect(() => {
+    if (user.id)
+      formik.setValues({
+        imageProfile: user.imageProfile,
+        name: user.name,
+        address: user.address,
+        phone: user.phone,
+        gender: user.gender,
+      });
+    console.log(user, "mana ");
+  }, [user]);
+
+  function handleChangeImage() {
+    if (imageProf.current?.files && imageProf.current?.files[0]) {
+      const file = imageProf.current.files[0];
+      setImagePreview(URL.createObjectURL(file));
+      formik.setFieldValue("imageProfile", file);
+      console.log("file selected", file);
+      console.log("image profile", URL.createObjectURL(file));
+    }
+  }
+
+  console.log("ini user image profile", user.imageProfile);
+  console.log("ini image preview", imagePreview);
 
   return (
     <>
@@ -26,9 +88,13 @@ const EditComponent = (props: Props) => {
             Account Information
           </h2>
 
-          <form action="">
+          <form onSubmit={formik.handleSubmit}>
             <div className="flex items-center gap-5 mb-4 md:mb-6">
-              <Avatar size="lg" rounded />
+              <Avatar
+                size="lg"
+                rounded
+                img={imagePreview || user.imageProfile}
+              />
               <div className="w-full">
                 <label
                   htmlFor="your-imageProfile"
@@ -38,9 +104,10 @@ const EditComponent = (props: Props) => {
                 </label>
                 <input
                   type="file"
-                  name=""
-                  id=""
+                  id="your-imageProfile"
+                  ref={imageProf}
                   className="block w-full text-sm text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-gray-50"
+                  onChange={() => handleChangeImage()}
                 />
               </div>
             </div>
@@ -57,6 +124,7 @@ const EditComponent = (props: Props) => {
                   type="text"
                   id="your-name"
                   className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
+                  {...formik.getFieldProps("name")}
                 />
               </div>
               <div className="mb-5">
@@ -70,6 +138,7 @@ const EditComponent = (props: Props) => {
                   type="text"
                   id="ypur-address"
                   className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
+                  {...formik.getFieldProps("address")}
                 />
               </div>
               <div className="mb-5">
@@ -83,6 +152,7 @@ const EditComponent = (props: Props) => {
                   type="text"
                   id="your-phone"
                   className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
+                  {...formik.getFieldProps("phone")}
                 />
               </div>
 
@@ -99,7 +169,12 @@ const EditComponent = (props: Props) => {
                       type="radio"
                       name="gender"
                       id="male"
-                      // value={male}
+                      value="male"
+                      checked={formik.values.gender === "male"}
+                      onChange={(e) => {
+                        const isChecked = e.target.checked;
+                        formik.setFieldValue("gender", isChecked ? "male" : "");
+                      }}
                       className="w-4 h-4 border-gray-300 focus:ring-2 focus:ring-blue-300"
                     />
                     <label
@@ -114,7 +189,15 @@ const EditComponent = (props: Props) => {
                       type="radio"
                       name="gender"
                       id="female"
-                      // value={female}
+                      value="female"
+                      checked={formik.values.gender === "female"}
+                      onChange={(e) => {
+                        const isChecked = e.target.checked;
+                        formik.setFieldValue(
+                          "gender",
+                          isChecked ? "female" : ""
+                        );
+                      }}
                       className="w-4 h-4 border-gray-300 focus:ring-2 focus:ring-blue-300"
                     />
                     <label

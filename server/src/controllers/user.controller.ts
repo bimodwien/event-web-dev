@@ -41,15 +41,6 @@ class UserController {
       next(error);
     }
   }
-  static async renderAvatar(req: Request, res: Response, next: NextFunction) {
-    try {
-      const blob = await UserService.render(req);
-      res.set("Content-type", "image/png");
-      res.send(blob);
-    } catch (err) {
-      next(err);
-    }
-  }
 
   static async verifiedUser(req: Request, res: Response, next: NextFunction) {
     try {
@@ -106,6 +97,15 @@ class UserController {
       });
     } catch (error) {
       next(error);
+    }
+  }
+
+  static async renderAvatar(req: Request, res: Response, next: NextFunction) {
+    try {
+      const blob = await UserService.render(req);
+      res.set("Content-type", "image/png").send(blob);
+    } catch (err) {
+      next(err);
     }
   }
 }

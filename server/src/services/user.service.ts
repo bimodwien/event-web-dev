@@ -200,15 +200,6 @@ class UserService {
     return data;
   }
 
-  static async render(req: Request) {
-    const data = await prisma.user.findUnique({
-      where: {
-        id: req.params.id,
-      },
-    });
-    return data?.imageProfile;
-  }
-
   static async validate(req: Request) {
     const user = await prisma.user.findUnique({
       select: {
@@ -222,7 +213,6 @@ class UserService {
         birthDate: true,
         address: true,
         phone: true,
-        imageProfile: true,
       },
       where: {
         id: req.user.id,
@@ -238,12 +228,23 @@ class UserService {
     );
   }
 
+  static async render(req: Request) {
+    const data = await prisma.user.findUnique({
+      where: {
+        id: req.params.id,
+      },
+    });
+    return data?.imageProfile;
+  }
+
   static async edit(req: Request) {
     const name: string = req.body.name;
     const address: string = req.body.address;
     const gender: string = req.body.gender;
     const phone: string = req.body.phone;
     const { file } = req;
+
+    console.log(req.body);
 
     const user = await prisma.user.findFirst({
       where: {
@@ -253,12 +254,6 @@ class UserService {
 
     if (!user) {
       throw new ValidationError("User not found");
-    }
-
-    const buffer = await sharp(req.file?.buffer).png().toBuffer();
-
-    if (!file) {
-      throw new ValidationError("No file uploaded");
     }
 
     const genders =
@@ -271,8 +266,21 @@ class UserService {
       address,
       phone,
       gender: genders,
-      imageProfile: buffer,
     };
+    console.log("<><><>");
+    console.log(file);
+
+    if (file) {
+      console.log("ini dalam file");
+
+      const buffer = await sharp(req.file?.buffer).toBuffer();
+      // throw new ValidationError("No file uploaded");
+      console.log(buffer);
+
+      console.log("<><><> after buffer");
+
+      data.imageProfile = buffer;
+    }
 
     await prisma.user.update({
       data,

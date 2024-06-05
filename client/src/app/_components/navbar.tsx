@@ -14,10 +14,6 @@ const Navbar = () => {
 
   const user = useAppSelector((state) => state.auth);
 
-  useEffect(() => {
-    console.log(user);
-  }, [user]);
-
   const toggleDropdown = () => {
     setIsDropdownOpen((prev) => !prev);
   };
@@ -85,7 +81,8 @@ const Navbar = () => {
             <span className="sr-only">Open user menu</span>
             <img
               className="w-8 h-8 rounded-full"
-              src="https://static.vecteezy.com/system/resources/thumbnails/009/292/244/small/default-avatar-icon-of-social-media-user-vector.jpg"
+              src={`http://localhost:8001/users/avatar/${user.id}`}
+              // src="https://static.vecteezy.com/system/resources/thumbnails/009/292/244/small/default-avatar-icon-of-social-media-user-vector.jpg"
               alt="user photo"
             />
           </button>

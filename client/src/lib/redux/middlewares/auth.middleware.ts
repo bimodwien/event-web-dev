@@ -41,6 +41,8 @@ export function keepLogin() {
       const decode = jwtDecode(token!) as { user: TUser };
 
       if (token) {
+        console.log(decode.user);
+
         dispatch(login(decode?.user));
       }
     } catch (error) {

@@ -17,9 +17,9 @@ routerUser.patch("/v4", UserController.verifiedUser);
 routerUser.post("/v5", UserController.requestReset);
 routerUser.post("/v6", UserController.resetPassword);
 routerUser.put(
-  "/v7/",
+  "/v7",
   validateToken,
-  blobUploader().single("image"),
+  blobUploader().single("imageProfile"),
   UserController.editProfile
 );
 routerUser.get("/avatar/:id", UserController.renderAvatar);
