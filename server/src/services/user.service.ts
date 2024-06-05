@@ -31,10 +31,12 @@ class UserService {
         email: true,
         name: true,
         password: true,
+        gender: true,
         address: true,
         referralCode: true,
         point: true,
         role: true,
+        avatarUrl: true,
       },
     })) as TUser;
     if (!user?.password) throw new ValidationError("Wrong email or password");
@@ -208,11 +210,13 @@ class UserService {
         isVerified: true,
         name: true,
         username: true,
+        gender: true,
         role: true,
         referralCode: true,
         birthDate: true,
         address: true,
         phone: true,
+        avatarUrl: true,
       },
       where: {
         id: req.user.id,
@@ -231,7 +235,7 @@ class UserService {
   static async render(req: Request) {
     const data = await prisma.user.findUnique({
       where: {
-        id: req.params.id,
+        avatarUrl: req.params.id,
       },
     });
     return data?.imageProfile;
@@ -244,18 +248,6 @@ class UserService {
     const phone: string = req.body.phone;
     const { file } = req;
 
-    console.log(req.body);
-
-    const user = await prisma.user.findFirst({
-      where: {
-        id: req.user.id,
-      },
-    });
-
-    if (!user) {
-      throw new ValidationError("User not found");
-    }
-
     const genders =
       (gender === "male" && $Enums.Gender.male) ||
       (gender === "female" && $Enums.Gender.female) ||
@@ -267,29 +259,46 @@ class UserService {
       phone,
       gender: genders,
     };
-    console.log("<><><>");
-    console.log(file);
 
     if (file) {
-      console.log("ini dalam file");
-
-      const buffer = await sharp(req.file?.buffer).toBuffer();
-      // throw new ValidationError("No file uploaded");
-      console.log(buffer);
-
-      console.log("<><><> after buffer");
+      const buffer = await sharp(req.file?.buffer).png().toBuffer();
 
       data.imageProfile = buffer;
+      data.avatarUrl = String(req.user.id) + new Date().getTime();
     }
-
     await prisma.user.update({
       data,
       where: {
-        id: String(user.id),
+        id: String(req.user.id),
       },
     });
 
-    return { message: "user has been updated" };
+    const user = await prisma.user.findUnique({
+      select: {
+        id: true,
+        email: true,
+        isVerified: true,
+        name: true,
+        username: true,
+        gender: true,
+        role: true,
+        referralCode: true,
+        birthDate: true,
+        address: true,
+        phone: true,
+        avatarUrl: true,
+      },
+      where: {
+        id: req.user.id,
+      },
+    });
+    return createToken(
+      {
+        user,
+        type: "access-token",
+      },
+      "15m"
+    );
   }
 }
 

@@ -91,9 +91,9 @@ class UserController {
 
   static async editProfile(req: Request, res: Response, next: NextFunction) {
     try {
-      const response = await UserService.edit(req);
-      res.status(201).send({
-        response,
+      const token = await UserService.edit(req);
+      res.cookie("access_token", token).status(201).send({
+        message: "berhasil hore",
       });
     } catch (error) {
       next(error);

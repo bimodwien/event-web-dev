@@ -8,21 +8,19 @@ import { useFormik } from "formik";
 import { axiosInstance } from "@/lib/axios";
 import { useRouter } from "next/navigation";
 import { TUser } from "../../../models/user.model";
+import { getCookie } from "cookies-next";
+import { jwtDecode } from "jwt-decode";
+import { useDispatch } from "react-redux";
+import { login } from "@/lib/redux/slices/user.slice";
 
 const EditComponent = () => {
   const user = useAppSelector((state) => state.auth);
-  // console.log(user);
   const router = useRouter();
 
   const imageProf = useRef<HTMLInputElement>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
 
-  // const [imagesProfile, setImagesProfile] = useState(user.imageProfile);
-  // const [names, setNames] = useState(user.name);
-  // const [addresses, setAddresses] = useState(user.address);
-  // const [phones, setPhones] = useState(user.phone);
-  // const [genders, setGenders] = useState(user.gender);
-
+  const dispatch = useDispatch();
   YupPassword(Yup);
   const initialValues = {
     imageProfile: user.imageProfile,
@@ -46,7 +44,14 @@ const EditComponent = () => {
           headers: {
             "Content-Type": "multipart/form-data",
           },
+          withCredentials: true,
         });
+        const token = getCookie("access_token");
+        if (token) {
+          const decode = jwtDecode(token) as { user: TUser };
+          dispatch(login(decode.user));
+        }
+
         alert("User berhasil edit data");
         router.push("/");
       } catch (error) {
@@ -93,7 +98,11 @@ const EditComponent = () => {
               <Avatar
                 size="lg"
                 rounded
-                img={imagePreview || user.imageProfile}
+                img={
+                  user.avatarUrl
+                    ? "http://localhost:8001/users/avatar/" + user.avatarUrl
+                    : String(imagePreview)
+                }
               />
               <div className="w-full">
                 <label

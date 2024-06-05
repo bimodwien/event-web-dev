@@ -35,6 +35,7 @@ model User {
   point            Int           @default(0)
   pointExpiredDate DateTime      @default(now())
   imageProfile     Bytes?        @db.LongBlob
+  avatarUrl        String?       @unique
   phone            String?
   isVerified       Boolean?      @default(false)
   role             Role?
