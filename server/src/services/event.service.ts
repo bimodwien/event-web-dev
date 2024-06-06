@@ -1,6 +1,6 @@
 import { Request } from "express";
 import prisma from "../lib/prisma";
-import { CategoryName, City, Prisma } from "@prisma/client";
+import { CategoryName, City, Prisma, PromoList } from "@prisma/client";
 import sharp from "sharp";
 import { TEvent } from "../models/event.model";
 
@@ -11,11 +11,15 @@ class EventService {
         createdAt: "desc",
       },
       select: {
+        id: true,
         title: true,
         city: true,
         start_event: true,
         end_event: true,
         ticket_price: true,
+        promo_price: true,
+        type: true,
+        promotion: true,
         user: { select: { username: true } },
       },
     });
@@ -38,6 +42,7 @@ class EventService {
         start_event: true,
         end_event: true,
         ticket_price: true,
+
         user: { select: { username: true } },
       },
     });
@@ -63,11 +68,15 @@ class EventService {
     const data = await prisma.event.findMany({
       where: filtering,
       select: {
+        id: true,
         title: true,
         city: true,
         start_event: true,
         end_event: true,
         ticket_price: true,
+        promo_price: true,
+        type: true,
+        promotion: true,
         user: { select: { username: true } },
       },
       orderBy: {
@@ -85,16 +94,20 @@ class EventService {
     const data = await prisma.event.findUnique({
       where: { id: eventId },
       select: {
+        id: true,
         title: true,
-        city: true,
         location: true,
-        address: true,
+        city: true,
         start_event: true,
         end_event: true,
-        ticket_available: true,
         ticket_price: true,
+        promo_price: true,
+        description: true,
+        terms_conditions: true,
+        type: true,
+        category: true,
         promotion: true,
-        user: { select: { username: true } },
+        user: { select: { name: true } },
       },
     });
 
@@ -107,11 +120,16 @@ class EventService {
         userId: req.user?.id,
       },
       select: {
+        id: true,
         title: true,
         city: true,
         start_event: true,
         end_event: true,
         ticket_price: true,
+        promo_price: true,
+        type: true,
+        promotion: true,
+        user: { select: { username: true } },
       },
       orderBy: {
         createdAt: "desc",
@@ -154,38 +172,75 @@ class EventService {
     const buffer = await sharp(req.file?.buffer).png().toBuffer();
     if (!file) throw new Error("no file image uploaded");
 
-    const eventPrice = type === "free" ? 0 : Number(ticket_price);
-
     if (promotion && (!start_promo || !end_promo)) {
       throw new Error("start & end promotion must be provided");
-    }
+    } else if (promotion && start_promo && end_promo) {
+      if (
+        promotion &&
+        start_promo &&
+        new Date(start_promo) > new Date(start_event)
+      ) {
+        throw new Error("promotion must start before the event start ");
+      } else if (
+        promotion &&
+        end_promo &&
+        new Date(end_promo) > new Date(start_event)
+      ) {
+        throw new Error("promotion must end before the event start");
+      }
 
-    const data: Prisma.EventCreateInput = {
-      title,
-      city,
-      location,
-      address,
-      start_event: new Date(start_event).toISOString(),
-      end_event: new Date(end_event),
-      description,
-      terms_conditions,
-      image: buffer,
-      category,
-      type,
-      ticket_available: Number(ticket_available),
-      ticket_price: eventPrice,
-      max_buy,
-      promotion,
-      start_promo: start_promo ? new Date(start_promo) : undefined,
-      end_promo: end_promo ? new Date(end_promo) : undefined,
-      user: {
-        connect: {
-          id: req.user?.id,
+      const promoDiscounts: { [key in PromoList]: number } = {
+        five: 0.05,
+        ten: 0.1,
+        fifth_teen: 0.15,
+        twenty: 0.2,
+        twenty_five: 0.25,
+        forty: 0.4,
+        fifty: 0.5,
+      };
+      let eventPrice;
+      let discountPrice;
+      if (type === "free") {
+        eventPrice = 0;
+      } else if (type === "paid") {
+        eventPrice = Number(ticket_price);
+        if (type === "paid" && promotion) {
+          const discount =
+            promoDiscounts[promotion as keyof typeof promoDiscounts];
+          discountPrice = ticket_price
+            ? ticket_price - ticket_price * discount
+            : null;
+        }
+      }
+
+      const data: Prisma.EventCreateInput = {
+        title,
+        city,
+        location,
+        address,
+        start_event: new Date(start_event).toISOString(),
+        end_event: new Date(end_event),
+        description,
+        terms_conditions,
+        image: buffer,
+        category,
+        type,
+        ticket_available: Number(ticket_available),
+        ticket_price: eventPrice,
+        promo_price: discountPrice,
+        max_buy,
+        promotion,
+        start_promo: start_promo ? new Date(start_promo) : undefined,
+        end_promo: end_promo ? new Date(end_promo) : undefined,
+        user: {
+          connect: {
+            id: req.user?.id,
+          },
         },
-      },
-    };
+      };
 
-    return await prisma.event.create({ data });
+      return await prisma.event.create({ data });
+    }
   }
 
   async render(req: Request) {
@@ -200,7 +255,47 @@ class EventService {
   async updateEvent(req: Request) {
     const { eventId } = req.params;
     const { file } = req;
+
+    const currentEvent = await prisma.event.findUnique({
+      where: { id: eventId, userId: req.user?.id },
+      select: { ticket_price: true, type: true },
+    });
+    if (!currentEvent) {
+      throw new Error("Event not found");
+    }
+
     const data: Prisma.EventUpdateInput = { ...req.body };
+
+    const promoDiscounts: { [key in PromoList]: number } = {
+      five: 0.05,
+      ten: 0.1,
+      fifth_teen: 0.15,
+      twenty: 0.2,
+      twenty_five: 0.25,
+      forty: 0.4,
+      fifty: 0.5,
+    };
+    const promotion = req.body.promotion as PromoList;
+    const type = req.body.type || currentEvent.type;
+    const ticket_price =
+      req.body.ticket_price !== undefined
+        ? Number(req.body.ticket_price)
+        : currentEvent.ticket_price;
+
+    let discountPrice;
+    console.log("Extracted fields:", { promotion, ticket_price, type });
+    if (type === "paid" && promotion) {
+      const discount = promoDiscounts[promotion as keyof typeof promoDiscounts];
+      discountPrice = ticket_price
+        ? ticket_price - ticket_price * discount
+        : null;
+      console.log("Discount calculation:", { discount, discountPrice });
+    }
+    if (promotion) {
+      data.promotion = promotion;
+      data.promo_price = discountPrice;
+      console.log("Data object before update:", data);
+    }
 
     if (file) {
       const buffer = await sharp(req.file?.buffer).png().toBuffer();
@@ -231,4 +326,5 @@ class EventService {
     });
   }
 }
+
 export default new EventService();

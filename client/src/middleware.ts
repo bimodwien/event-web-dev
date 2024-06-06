@@ -61,13 +61,18 @@ export async function middleware(request: NextRequest) {
   )
     return NextResponse.redirect(new URL("/", request.url));
   // akses home / dashboard / verif klo g login => /login
-  else if ((pathname == "/" || pathname == "/dashboard") && !isLogin)
+  else if ((pathname == "/" || pathname.startsWith("/dashboard")) && !isLogin)
     return NextResponse.redirect(new URL("/login", request.url));
   // akses home klo seller login => dashboard
   else if (pathname == "/" && isLogin && isVerfied && !isCustomer)
     return NextResponse.redirect(new URL("/dashboard", request.url));
   // akses dashboard klo buyer login => home
-  else if (pathname == "/dashboard" && isLogin && isVerfied && isCustomer)
+  else if (
+    pathname.startsWith("/dashboard") &&
+    isLogin &&
+    isVerfied &&
+    isCustomer
+  )
     return NextResponse.redirect(new URL("/", request.url));
   // akses verif klo login, dh verif, seller => dashboard
   else if (pathname == "/verify-user" && isLogin && isVerfied && !isCustomer)
@@ -82,5 +87,5 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/", "/login", "/register", "/verify-user", "/dashboard"],
+  matcher: ["/", "/login", "/register", "/verify-user", "/dashboard/:path*"],
 };
