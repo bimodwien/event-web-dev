@@ -10,8 +10,9 @@ export async function middleware(request: NextRequest) {
 
   const response = NextResponse.next();
   const isLogin = await fetch(
+    "http://localhost:8001/users/v3",
     // process.env.NEXT_PUBLIC_API_BASED_URL_LOCAL + "/users/v3",
-    process.env.NEXT_PUBLIC_API_BASED_VPS + "/users/v3",
+    // process.env.NEXT_PUBLIC_API_BASED_VPS + "/users/v3",
     {
       method: "GET",
       headers: {
