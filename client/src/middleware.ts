@@ -9,12 +9,15 @@ export async function middleware(request: NextRequest) {
   const refresh_token = request.cookies.get("refresh_token")?.value || "";
 
   const response = NextResponse.next();
-  const isLogin = await fetch("http://localhost:8001/users/v3", {
-    method: "GET",
-    headers: {
-      Authorization: "Bearer " + refresh_token,
-    },
-  })
+  const isLogin = await fetch(
+    process.env.NEXT_PUBLIC_API_BASED_URL_LOCAL + "/users/v3",
+    {
+      method: "GET",
+      headers: {
+        Authorization: "Bearer " + refresh_token,
+      },
+    }
+  )
     .then(async (res) => {
       const data = await res.json();
       if (!data.access_token) throw new Error("not login");
