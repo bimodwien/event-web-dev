@@ -3,6 +3,7 @@
 import { axiosInstance } from "@/lib/axios";
 import { AxiosError } from "axios";
 import { useFormik } from "formik";
+import { useRouter } from "next/navigation";
 import React, { useRef, useState } from "react";
 import * as Yup from "yup";
 
@@ -10,6 +11,8 @@ const EventForm = () => {
   const [isTypeFree, setTypeFree] = useState(false);
 
   const imageRef = useRef<HTMLInputElement>(null);
+
+  const router = useRouter();
 
   const initialValues = {
     title: "",
@@ -96,6 +99,7 @@ const EventForm = () => {
 
         const { data } = await axiosInstance().post("/events/e1", newEvent);
         alert(data.message);
+        router.push("dashboard/my-event");
       } catch (error) {
         if (error instanceof AxiosError) alert(error.response?.data?.message);
         else if (error instanceof Error) console.log(error.message);

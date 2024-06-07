@@ -10,8 +10,6 @@ const EventPromotor = () => {
   dayjs.extend(relativeTime);
   const [eventData, setEventData] = useState<any[]>([]);
 
-  console.log(eventData);
-
   const fetchEventData = async () => {
     try {
       const response = await axiosInstance().get("/events/yours");
@@ -24,6 +22,7 @@ const EventPromotor = () => {
 
   useEffect(() => {
     fetchEventData();
+    console.log("ini adalah event data", eventData);
   }, []);
 
   return (
