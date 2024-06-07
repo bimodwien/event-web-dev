@@ -1,5 +1,5 @@
 import React from "react";
-import EventForm from "./_components/eventForm";
+import EventForm from "../_components/eventForm";
 
 const createEvent = () => {
   return (

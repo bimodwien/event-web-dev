@@ -35,6 +35,7 @@ model User {
   point            Int           @default(0)
   pointExpiredDate DateTime      @default(now())
   imageProfile     Bytes?        @db.LongBlob
+
   avatarUrl        String?       @unique
   phone            String?
   isVerified       Boolean?      @default(false)
@@ -129,6 +130,7 @@ model Event {
   type             Type
   ticket_available Int
   ticket_price     Float?        @db.Double
+  promo_price      Float?        @db.Double
   max_buy          MaxBuy
   promotion        PromoList?
   start_promo      DateTime?

@@ -1,25 +1,20 @@
 "use client";
 
 import { usePathname } from "next/navigation";
-import Navbar from "./_components/navbar";
-import Sidebar from "./_components/sidebar";
+import NavDashboard from "./_components/nav";
 
 type Props = { children: React.ReactNode };
 export default function ResponsiveNavWrapper({ children }: Props) {
   const pathname: string = usePathname();
-  const isCustomer: boolean =
+  const isOrganizer: boolean =
     pathname === "/login" ||
     pathname === "/register" ||
-    pathname === "/dashboard" ||
-    pathname.startsWith("/dashboard/");
-
-    pathname === "/reset-password" ||
-    pathname === "/verification" ||
-    pathname === "/reset-token" ||
+    pathname === "/" ||
     pathname === "/dashboard/create-event";
+
   return (
     <main>
-      {!isCustomer && <Navbar />}
+      {!isOrganizer && <NavDashboard />}
       {children}
     </main>
   );

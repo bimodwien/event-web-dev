@@ -4,7 +4,10 @@ import {
   verifyCustomer,
   verifyEventOrganizer,
 } from "../middlewares/role.middleware";
-import { validateRefreshToken } from "../middlewares/auth.middleware";
+import {
+  validateRefreshToken,
+  validateToken,
+} from "../middlewares/auth.middleware";
 import { blobUploader } from "../lib/multer";
 
 class EventRouter {
@@ -17,7 +20,7 @@ class EventRouter {
     this.router.get("/", eventController.getAll);
     this.router.get(
       "/yours",
-      validateRefreshToken,
+      validateToken,
       verifyEventOrganizer,
       eventController.getByPromotor
     );
@@ -26,7 +29,7 @@ class EventRouter {
     this.router.get("/:eventId", eventController.getDetail);
     this.router.post(
       "/e1",
-      validateRefreshToken,
+      validateToken,
       verifyEventOrganizer,
       blobUploader().single("image"),
       eventController.createEvent
@@ -34,7 +37,7 @@ class EventRouter {
     this.router.get("/image/:id", eventController.render);
     this.router.patch(
       "/:eventId",
-      validateRefreshToken,
+      validateToken,
       verifyEventOrganizer,
       blobUploader().single("image"),
       eventController.updateEvent
@@ -42,7 +45,7 @@ class EventRouter {
 
     this.router.delete(
       "/:eventId",
-      validateRefreshToken,
+      validateToken,
       verifyEventOrganizer,
       eventController.delete
     );
