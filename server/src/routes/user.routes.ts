@@ -17,26 +17,27 @@
 
 import { Router } from "express";
 import UserController from "../controllers/user.controller";
-import { validateRefreshToken } from "../middlewares/auth.middleware";
 import { blobUploader } from "../lib/multer";
+import {
+  validateRefreshToken,
+  validateToken,
+} from "../middlewares/auth.middleware";
 
-class UserRouter {
-  private router: Router;
-  constructor() {
-    this.router = Router();
-    this.initializedRoutes();
-  }
-  initializedRoutes() {
-    this.router.post(
-      "/v1",
-      blobUploader().single("image"),
-      UserController.register
-    );
-    this.router.post("/v2", UserController.login);
-    this.router.get("/v3", validateRefreshToken, UserController.validateUser);
-    this.router.patch("/v4", UserController.verifiedUser);
-    this.router.get("/avatar/:id", UserController.renderAvatar);
-  }
+const routerUser = Router();
+
+routerUser.post("/v1", UserController.register);
+routerUser.post("/v2", UserController.login);
+routerUser.get("/v3", validateRefreshToken, UserController.validateUser);
+routerUser.patch("/v4", UserController.verifiedUser);
+routerUser.post("/v5", UserController.requestReset);
+routerUser.post("/v6", UserController.resetPassword);
+routerUser.put(
+  "/v7",
+  validateToken,
+  blobUploader().single("imageProfile"),
+  UserController.editProfile
+);
+routerUser.get("/avatar/:id", UserController.renderAvatar);
 
   getRouter() {
     return this.router;

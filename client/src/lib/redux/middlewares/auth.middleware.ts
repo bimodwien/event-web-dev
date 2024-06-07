@@ -1,6 +1,6 @@
 import { Dispatch } from "@reduxjs/toolkit";
 import { axiosInstance } from "@/lib/axios";
-import { login, logout } from "../slices/user.slice";
+import { login } from "../slices/user.slice";
 import { TUser } from "@/models/user.model";
 import { deleteCookie, getCookie } from "cookies-next";
 import { jwtDecode } from "jwt-decode";
@@ -38,8 +38,12 @@ export function keepLogin() {
   return async function dispatch(dispatch: Dispatch) {
     try {
       const token = getCookie("access_token");
+      const decode = jwtDecode(token!) as { user: TUser };
+
       if (token) {
-        dispatch(login(jwtDecode(token)));
+        console.log(decode.user);
+
+        dispatch(login(decode?.user));
       }
     } catch (error) {
       console.log(error);

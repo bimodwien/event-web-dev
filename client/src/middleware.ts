@@ -9,12 +9,17 @@ export async function middleware(request: NextRequest) {
   const refresh_token = request.cookies.get("refresh_token")?.value || "";
 
   const response = NextResponse.next();
-  const isLogin = await fetch("http://localhost:8001/users/v3", {
-    method: "GET",
-    headers: {
-      Authorization: "Bearer " + refresh_token,
-    },
-  })
+  const isLogin = await fetch(
+    "http://localhost:8001/users/v3",
+    // process.env.NEXT_PUBLIC_API_BASED_URL_LOCAL + "/users/v3",
+    // process.env.NEXT_PUBLIC_API_BASED_VPS + "/users/v3",
+    {
+      method: "GET",
+      headers: {
+        Authorization: "Bearer " + refresh_token,
+      },
+    }
+  )
     .then(async (res) => {
       const data = await res.json();
       if (!data.access_token) throw new Error("not login");
@@ -37,11 +42,6 @@ export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
   const isCustomer = decode?.user.role === "customer" ? true : false;
 
-  // console.log("-----", decode?.user.username);
-  // console.log("<<<<<", decode?.user.role);
-
-  // console.log(">>>>>", isCustomer);
-
   // akses login / register klo seller login & verif => /dashboard
   if (
     (pathname == "/login" || pathname == "/register") &&
@@ -63,6 +63,13 @@ export async function middleware(request: NextRequest) {
   // akses home / dashboard / verif klo g login => /login
   else if ((pathname == "/" || pathname.startsWith("/dashboard")) && !isLogin)
     return NextResponse.redirect(new URL("/login", request.url));
+  // akses home / dashboard kalo belum ke verify
+  else if (
+    (pathname == "/" || pathname == "/dashboard") &&
+    isLogin &&
+    !isVerfied
+  )
+    return NextResponse.redirect(new URL("/verify-user", request.url));
   // akses home klo seller login => dashboard
   else if (pathname == "/" && isLogin && isVerfied && !isCustomer)
     return NextResponse.redirect(new URL("/dashboard", request.url));
@@ -82,10 +89,21 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(new URL("/", request.url));
   else if (pathname == "/verify-user" && !isLogin)
     return NextResponse.redirect(new URL("/login", request.url));
+  // akses ke edit profile namun belum login
+  else if (pathname == "/edit-profile" && !isLogin)
+    return NextResponse.redirect(new URL("/login", request.url));
 
   return response;
 }
 
 export const config = {
-  matcher: ["/", "/login", "/register", "/verify-user", "/dashboard/:path*"],
+
+  matcher: [
+    "/",
+    "/login",
+    "/register",
+    "/verify-user",
+    "/dashboard/:path*"
+    "/edit-profile",
+  ],
 };

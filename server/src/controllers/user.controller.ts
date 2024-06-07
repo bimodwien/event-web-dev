@@ -1,7 +1,7 @@
 "use strict";
 
 import { NextFunction, Request, Response } from "express";
-import UserService from "../services/user.service";
+import { UserService, ValidationError } from "../services/user.service";
 
 class UserController {
   static async register(req: Request, res: Response, next: NextFunction) {
@@ -12,7 +12,18 @@ class UserController {
         data,
       });
     } catch (error) {
-      next(error);
+      if (error instanceof ValidationError) {
+        res.status(400).send({
+          message: "Registeration Failed",
+          error: error.message,
+        });
+      } else {
+        res.status(500).send({
+          message: "Registeration Failed",
+          error: "unexpected error",
+        });
+      }
+      // next(error);
     }
   }
 
@@ -28,15 +39,6 @@ class UserController {
         .send({ message: "login success" });
     } catch (error) {
       next(error);
-    }
-  }
-  static async renderAvatar(req: Request, res: Response, next: NextFunction) {
-    try {
-      const blob = await UserService.render(req);
-      res.set("Content-type", "image/png");
-      res.send(blob);
-    } catch (err) {
-      next(err);
     }
   }
 
@@ -61,6 +63,49 @@ class UserController {
       });
     } catch (error) {
       next(error);
+    }
+  }
+
+  static async requestReset(req: Request, res: Response, next: NextFunction) {
+    try {
+      const response = await UserService.requestResetPassword(req);
+      res.send({
+        response,
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  static async resetPassword(req: Request, res: Response, next: NextFunction) {
+    console.log("controller ");
+    try {
+      const response = await UserService.resetPassword(req);
+      res.send({
+        response,
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  static async editProfile(req: Request, res: Response, next: NextFunction) {
+    try {
+      const token = await UserService.edit(req);
+      res.cookie("access_token", token).status(201).send({
+        message: "berhasil hore",
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  static async renderAvatar(req: Request, res: Response, next: NextFunction) {
+    try {
+      const blob = await UserService.render(req);
+      res.set("Content-type", "image/png").send(blob);
+    } catch (err) {
+      next(err);
     }
   }
 }
