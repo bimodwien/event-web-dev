@@ -63,6 +63,13 @@ export async function middleware(request: NextRequest) {
   // akses home / dashboard / verif klo g login => /login
   else if ((pathname == "/" || pathname == "/dashboard") && !isLogin)
     return NextResponse.redirect(new URL("/login", request.url));
+  // akses home / dashboard kalo belum ke verify
+  else if (
+    (pathname == "/" || pathname == "/dashboard") &&
+    isLogin &&
+    !isVerfied
+  )
+    return NextResponse.redirect(new URL("/verify-user", request.url));
   // akses home klo seller login => dashboard
   else if (pathname == "/" && isLogin && isVerfied && !isCustomer)
     return NextResponse.redirect(new URL("/dashboard", request.url));

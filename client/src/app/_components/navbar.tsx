@@ -110,7 +110,7 @@ const Navbar = () => {
                 </li>
                 <li>
                   <button className="block mx-3 mt-4 py-1 px-2 text-sm rounded bg-red-700 hover:bg-red-600 text-white">
-                    <Logout />
+                    <Logout title="Logout" />
                   </button>
                 </li>
               </ul>
