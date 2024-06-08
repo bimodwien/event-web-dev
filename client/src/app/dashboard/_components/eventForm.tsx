@@ -99,7 +99,7 @@ const EventForm = () => {
 
         const { data } = await axiosInstance().post("/events/e1", newEvent);
         alert(data.message);
-        router.push("dashboard/my-event");
+        router.push("/my-event");
       } catch (error) {
         if (error instanceof AxiosError) alert(error.response?.data?.message);
         else if (error instanceof Error) console.log(error.message);
