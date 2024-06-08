@@ -100,6 +100,7 @@ class EventService {
         city: true,
         start_event: true,
         end_event: true,
+        image: true,
         ticket_price: true,
         promo_price: true,
         description: true,
