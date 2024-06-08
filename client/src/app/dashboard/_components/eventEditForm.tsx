@@ -73,7 +73,7 @@ const EventEditForm = ({ forEditData }: Props) => {
     }),
     onSubmit: async (values): Promise<void> => {
       try {
-        console.log("ahsuidhgiasdguas");
+        console.log("this when i trigger the button");
 
         const newEvent = new FormData();
 
