@@ -146,10 +146,10 @@ const EventEditForm = ({ forEditData }: Props) => {
         max_buy: forEditData.max_buy,
         promotion: forEditData.promotion || "",
         start_promo: forEditData.start_promo
-          ? new Date(forEditData.start_promo).toISOString()
+          ? forEditData.start_promo.split("T")[0]
           : "",
         end_promo: forEditData.end_promo
-          ? new Date(forEditData.end_promo).toISOString()
+          ? forEditData.end_promo.split("T")[0]
           : "",
         image: forEditData.image,
         image_url: forEditData.image,
