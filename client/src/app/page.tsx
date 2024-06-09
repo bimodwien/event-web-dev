@@ -1,10 +1,9 @@
-import EventCard from "./_components/eventCard";
+import EventList from "./_components/home/filterEvent";
 
 export default function Home() {
   return (
     <main className="">
-      <h1>home</h1>
-      <EventCard />
+      <EventList />
     </main>
   );
 }

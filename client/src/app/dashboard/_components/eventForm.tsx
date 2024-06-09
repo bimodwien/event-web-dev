@@ -46,7 +46,7 @@ const EventForm = () => {
       ticket_price: Yup.number().required(),
       description: Yup.string().required(),
       terms_conditions: Yup.string().required(),
-      category: Yup.string().oneOf(["Music", "Category", "Sport"]).required(),
+      category: Yup.string().oneOf(["Music", "Workshop", "Sport"]).required(),
       promotion: Yup.string().oneOf([
         "five",
         "ten",
@@ -56,8 +56,8 @@ const EventForm = () => {
         "forty",
         "fifty",
       ]),
-      start_promo: Yup.string(),
-      end_promo: Yup.string(),
+      start_promo: Yup.date(),
+      end_promo: Yup.date(),
       max_buy: Yup.string()
         .oneOf(["one", "two", "three", "four", "five"])
         .required(),
@@ -317,49 +317,50 @@ const EventForm = () => {
                   )}
                 </div>
               </div>
-              <div className="flex flex-col gap-2">
-                <p>Promotion (optional)</p>
-                <div className="flex gap-5">
-                  <div className="flex flex-col w-60">
-                    <label htmlFor="city">Promotion</label>
-                    <select
-                      id="promotion"
-                      className="bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block p-2.5 w-60"
-                      {...formik.getFieldProps("promotion")}
-                      required
-                    >
-                      <option value="">Select a promotion</option>
-                      <option value="five">5%</option>
-                      <option value="ten">10&</option>
-                      <option value="fifth_teen">15%</option>
-                      <option value="twenty">20%</option>
-                      <option value="twenty_five">25%</option>
-                      <option value="forty">40%</option>
-                      <option value="fifty">50%</option>
-                    </select>
-                  </div>
-                  <div className="flex flex-col w-60">
-                    <label htmlFor="">Start</label>
-                    <input
-                      type="date"
-                      id="start_promo"
-                      placeholder=""
-                      className="bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5"
-                      {...formik.getFieldProps("start_promo")}
-                    />
-                  </div>
-                  <div className="flex flex-col w-60">
-                    <label htmlFor="">End</label>
-                    <input
-                      type="date"
-                      id="end_promo"
-                      placeholder=""
-                      className="bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5"
-                      {...formik.getFieldProps("end_promo")}
-                    />
+              {!isTypeFree && (
+                <div className="flex flex-col gap-2">
+                  <p>Promotion (optional)</p>
+                  <div className="flex gap-5">
+                    <div className="flex flex-col w-60">
+                      <label htmlFor="city">Promotion</label>
+                      <select
+                        id="promotion"
+                        className="bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block p-2.5 w-60"
+                        {...formik.getFieldProps("promotion")}
+                      >
+                        <option value="">Select a promotion</option>
+                        <option value="five">5%</option>
+                        <option value="ten">10&</option>
+                        <option value="fifth_teen">15%</option>
+                        <option value="twenty">20%</option>
+                        <option value="twenty_five">25%</option>
+                        <option value="forty">40%</option>
+                        <option value="fifty">50%</option>
+                      </select>
+                    </div>
+                    <div className="flex flex-col w-60">
+                      <label htmlFor="">Start</label>
+                      <input
+                        type="date"
+                        id="start_promo"
+                        placeholder=""
+                        className="bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5"
+                        {...formik.getFieldProps("start_promo")}
+                      />
+                    </div>
+                    <div className="flex flex-col w-60">
+                      <label htmlFor="">End</label>
+                      <input
+                        type="date"
+                        id="end_promo"
+                        placeholder=""
+                        className="bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5"
+                        {...formik.getFieldProps("end_promo")}
+                      />
+                    </div>
                   </div>
                 </div>
-              </div>
+              )}
             </div>
             <hr className="font-bold my-5" />
             <div className="flex flex-col gap-5">

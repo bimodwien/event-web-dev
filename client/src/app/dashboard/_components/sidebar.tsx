@@ -8,7 +8,7 @@ const Sidebar = () => {
           href="/dashboard"
           className="flex items-center space-x-3 rtl:space-x-reverse p-5 "
         >
-          <span className="self-center text-2xl font-semibold whitespace-nowrap dark:text-white">
+          <span className="self-center text-2xl font-semibold whitespace-nowrap text-white">
             TiketFest
           </span>
         </Link>

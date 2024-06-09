@@ -4,6 +4,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { AiOutlineSearch } from "react-icons/ai";
 import Logout from "./logout";
 import { IoAdd } from "react-icons/io5";
+import SearchOnNavbar from "./searchNav";
 
 const Navbar = () => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
@@ -33,10 +34,10 @@ const Navbar = () => {
   }, []);
 
   return (
-    <nav className="bg-white border-gray-200 dark:bg-gray-900 sticky top-0">
+    <nav className="border-gray-200 bg-gray-900 sticky top-0 z-50">
       <div className="max-w-screen flex flex-wrap items-center justify-between mx-5 md:mx-10 py-5">
         <a href="/" className="flex items-center space-x-3 rtl:space-x-reverse">
-          <span className="self-center text-2xl font-semibold whitespace-nowrap dark:text-white">
+          <span className="self-center text-2xl font-semibold whitespace-nowrap text-white">
             TiketFest
           </span>
         </a>
@@ -44,28 +45,10 @@ const Navbar = () => {
           className="items-center justify-between hidden w-full md:flex md:w-auto "
           id="navbar-user"
         >
-          <form className="w-[400px] relative">
-            <div className="relative">
-              <input
-                type="search"
-                placeholder="search event here"
-                className="w-full h-10 p-4 rounded-full bg-slate-800 text-sm text-white"
-              />
-              <button className="absolute right-1 top-1/2 -translate-y-1/2 p-2 bg-slate-600 text-white rounded-full">
-                <AiOutlineSearch />
-              </button>
-            </div>
-          </form>
+          {/* <SearchOnNavbar /> */}
         </div>
 
         <div className="flex items-center gap-2 ">
-          <a
-            href="/dashboard/create-event"
-            className="text-white hidden md:flex gap-1 items-center bg-gray-700 hover:bg-gray-600 py-2 px-3 rounded-full text-sm"
-          >
-            <IoAdd className="text-lg" />
-            Add Event
-          </a>
           <button
             ref={userPhotoRef}
             type="button"
@@ -84,14 +67,12 @@ const Navbar = () => {
           {isDropdownOpen && (
             <div
               ref={dropdownRef}
-              className="z-50 absolute text-base list-none bg-white divide-y divide-gray-100 rounded-lg shadow dark:bg-gray-700 dark:divide-gray-600 right-10 top-16"
+              className="z-50 absolute text-base list-none rounded-lg shadow bg-gray-700 divide-gray-600 right-10 top-16"
               id="user-dropdown"
             >
               <div className="px-4 py-3">
-                <span className="block text-sm text-gray-900 dark:text-white">
-                  Bonnie Green
-                </span>
-                <span className="block text-xs text-gray-500 truncate dark:text-gray-400">
+                <span className="block text-sm text-white">Bonnie Green</span>
+                <span className="block text-xs  truncate text-gray-400">
                   name@mail.com
                 </span>
               </div>
@@ -99,7 +80,7 @@ const Navbar = () => {
                 <li>
                   <a
                     href="/edit-profile"
-                    className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-gray-200 dark:hover:text-white"
+                    className="block px-4 py-2 text-sm  hover:bg-gray-600 text-white"
                   >
                     Edit Profile
                   </a>
