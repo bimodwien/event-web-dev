@@ -17,8 +17,10 @@ export type TEvent = {
   ticket_price: number;
   promo_price: number;
   promotion?: string;
-  start_promo?: Date;
-  end_promo?: Date;
+  start_promo?: string;
+  end_promo?: string;
+  image: string;
+  image_url: string;
   max_buy: string;
   user: TUser;
 };

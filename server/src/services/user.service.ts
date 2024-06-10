@@ -10,6 +10,13 @@ import { createToken } from "../lib/jwt";
 import { randomBytes } from "crypto";
 import { verify } from "jsonwebtoken";
 import { SECRET_KEY } from "../config";
+import sharp from "sharp";
+
+class ValidationError extends Error {
+  constructor(message: string) {
+    super(message);
+  }
+}
 
 class UserService {
   static async loginService(req: Request) {
@@ -22,17 +29,20 @@ class UserService {
         id: true,
         username: true,
         email: true,
+        name: true,
         password: true,
+        gender: true,
         address: true,
         referralCode: true,
         point: true,
         role: true,
+        avatarUrl: true,
       },
     })) as TUser;
-    if (!user?.password) throw new Error("Wrong email or password");
+    if (!user?.password) throw new ValidationError("Wrong email or password");
 
     const checkUser = await comparePassword(user.password, password);
-    if (!checkUser) throw new Error("Wrong Password");
+    if (!checkUser) throw new ValidationError("Wrong Password");
     delete user.password;
 
     const access_token = createToken({ user, type: "access-token" }, "15m");
@@ -42,7 +52,7 @@ class UserService {
   }
 
   static async registerService(req: Request) {
-    prisma.$transaction(async (prisma) => {
+    await prisma.$transaction(async (prisma) => {
       const username: string = req.body.username;
       const email: string = req.body.email;
       const name: string = req.body.name;
@@ -59,7 +69,7 @@ class UserService {
           OR: [{ username }, { email }],
         },
       });
-      if (existingUser) throw new Error("User has been used");
+      if (existingUser) throw new ValidationError("User has been used");
 
       const hashed = await hashPassword(String(password));
 
@@ -68,7 +78,7 @@ class UserService {
         (roleInput == "customer" && $Enums.Role.customer) ||
         null;
       if (role == null) {
-        throw new Error("Invalid value for role field");
+        throw new ValidationError("Invalid value for role field");
       }
 
       if (referenceCode) console.log(referenceCode);
@@ -136,13 +146,60 @@ class UserService {
     return data;
   }
 
-  static async render(req: Request) {
-    const data = await prisma.user.findUnique({
+  static async requestResetPassword(req: Request) {
+    const email = req.body.email;
+
+    const user = await prisma.user.findFirst({
       where: {
-        id: req.params.id,
+        email,
       },
     });
-    return data?.imageProfile;
+
+    if (!user) {
+      throw new Error("User not found");
+    }
+
+    const resetToken = createToken({ userId: user.id }, "1hr");
+
+    const resetLink = `http://localhost:3001/reset-token/${resetToken}`;
+
+    await sendEmail(
+      String(user.email),
+      "../templates/reset-password.html",
+      resetLink,
+      "Please verify your email to reset password"
+    );
+    return { message: "Password email has been sent" };
+  }
+
+  static async resetPassword(req: Request) {
+    const token =
+      req.headers.authorization?.replace("Bearer ", "").toString() || "";
+    const password: string = req.body.password;
+    const { userId } = verify(token, SECRET_KEY) as { userId: string };
+
+    const newPassword = await hashPassword(String(password));
+
+    const user = await prisma.user.findFirst({
+      where: {
+        id: userId,
+      },
+    });
+
+    if (!user) {
+      throw new ValidationError("User not found");
+    }
+
+    const data = await prisma.user.update({
+      where: {
+        id: user?.id,
+      },
+      data: {
+        password: String(newPassword),
+      },
+    });
+
+    return data;
   }
 
   static async validate(req: Request) {
@@ -153,7 +210,13 @@ class UserService {
         isVerified: true,
         name: true,
         username: true,
+        gender: true,
         role: true,
+        referralCode: true,
+        birthDate: true,
+        address: true,
+        phone: true,
+        avatarUrl: true,
       },
       where: {
         id: req.user.id,
@@ -168,6 +231,75 @@ class UserService {
       "15m"
     );
   }
+
+  static async render(req: Request) {
+    const data = await prisma.user.findUnique({
+      where: {
+        id: req.params.id,
+      },
+    });
+    return data?.imageProfile;
+  }
+
+  static async edit(req: Request) {
+    const name: string = req.body.name;
+    const address: string = req.body.address;
+    const gender: string = req.body.gender;
+    const phone: string = req.body.phone;
+    const { file } = req;
+
+    const genders =
+      (gender === "male" && $Enums.Gender.male) ||
+      (gender === "female" && $Enums.Gender.female) ||
+      null;
+
+    const data: Prisma.UserUpdateInput = {
+      name,
+      address,
+      phone,
+      gender: genders,
+    };
+
+    if (file) {
+      const buffer = await sharp(req.file?.buffer).png().toBuffer();
+
+      data.imageProfile = buffer;
+      data.avatarUrl = String(req.user.id) + new Date().getTime();
+    }
+    await prisma.user.update({
+      data,
+      where: {
+        id: String(req.user.id),
+      },
+    });
+
+    const user = await prisma.user.findUnique({
+      select: {
+        id: true,
+        email: true,
+        isVerified: true,
+        name: true,
+        username: true,
+        gender: true,
+        role: true,
+        referralCode: true,
+        birthDate: true,
+        address: true,
+        phone: true,
+        avatarUrl: true,
+      },
+      where: {
+        id: req.user.id,
+      },
+    });
+    return createToken(
+      {
+        user,
+        type: "access-token",
+      },
+      "15m"
+    );
+  }
 }
 
-export default UserService;
+export { UserService, ValidationError };

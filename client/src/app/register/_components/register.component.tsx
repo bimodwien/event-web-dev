@@ -33,12 +33,18 @@ const ComponentRegister = () => {
     }),
     onSubmit: async (values) => {
       try {
-        console.log("bisa ehehe");
-        axiosInstance().post("/users/v1", values);
+        await axiosInstance().post("/users/v1", values);
         alert("User berhasil Register");
         router.push("/login");
       } catch (error) {
         console.log(error);
+        const respBody = (error as any).request.responseText;
+        try {
+          const respJson = JSON.parse(respBody);
+          alert(`User gagal Register - ${respJson.error}`);
+          return;
+        } catch (e) {}
+        alert(`User gagal Register - ${(error as any).message}`);
       }
     },
   });

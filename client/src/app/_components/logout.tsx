@@ -6,7 +6,7 @@ import React from "react";
 
 type Props = {};
 
-const Logout = () => {
+const Logout = ({ title }: { title: string }) => {
   const dispatch = useAppDispatch();
   const router = useRouter();
 
@@ -21,7 +21,7 @@ const Logout = () => {
           loggingout();
         }}
       >
-        Logout
+        {title}
       </button>
     </>
   );

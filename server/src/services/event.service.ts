@@ -20,7 +20,7 @@ class EventService {
         promo_price: true,
         type: true,
         promotion: true,
-        user: { select: { name: true } },
+        user: { select: { id: true, name: true } },
       },
     });
     return data;
@@ -90,7 +90,7 @@ class EventService {
         type: true,
         promotion: true,
         category: true,
-        user: { select: { name: true } },
+        user: { select: { id: true, name: true } },
       },
       orderBy: {
         createdAt: "desc",
@@ -113,17 +113,22 @@ class EventService {
         title: true,
         location: true,
         city: true,
+        address: true,
         start_event: true,
         end_event: true,
+        image: true,
         ticket_price: true,
         promo_price: true,
         description: true,
         terms_conditions: true,
         ticket_available: true,
+        max_buy: true,
         type: true,
         category: true,
         promotion: true,
-        user: { select: { name: true } },
+        start_promo: true,
+        end_promo: true,
+        user: { select: { id: true, name: true } },
       },
     });
 
@@ -295,7 +300,7 @@ class EventService {
     const type = req.body.type || currentEvent.type;
     const ticket_price =
       req.body.ticket_price !== undefined
-        ? Number(req.body.ticket_price)
+        ? parseFloat(req.body.ticket_price)
         : currentEvent.ticket_price;
 
     let discountPrice;
@@ -311,6 +316,15 @@ class EventService {
       data.promotion = promotion;
       data.promo_price = discountPrice;
       console.log("Data object before update:", data);
+    }
+
+    const ticket_available = parseInt(req.body.ticket_available);
+    if (ticket_available) {
+      data.ticket_available = ticket_available;
+    }
+
+    if (ticket_price) {
+      data.ticket_price = ticket_price;
     }
 
     if (file) {

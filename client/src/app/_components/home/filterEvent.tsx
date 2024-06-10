@@ -10,7 +10,7 @@ import { axiosInstance } from "@/lib/axios";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import Link from "next/link";
-import { formatPrice, imgSrc } from "../format";
+import { avatar, formatPrice, imgSrc } from "../format";
 
 const EventList = () => {
   const [search, setSearch] = useState<string>("");
@@ -116,7 +116,7 @@ const EventList = () => {
                 <hr className="mt-5" />
                 <div className="flex gap-2 items-center">
                   <img
-                    src="https://www.adobe.com/content/dam/cc/us/en/creativecloud/photography/discover/concert-photography/thumbnail.jpeg"
+                    src={`${avatar}${event.user.id}`}
                     alt=""
                     className="rounded-full w-8 h-8 object-cover"
                   />

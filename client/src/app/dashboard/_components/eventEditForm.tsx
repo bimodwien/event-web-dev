@@ -1,13 +1,17 @@
 "use client";
 
+import React, { useEffect, useState, useRef } from "react";
+import { TEvent } from "../../../models/event.mode";
+
 import { axiosInstance } from "@/lib/axios";
 import { AxiosError } from "axios";
 import { useFormik } from "formik";
 import { useRouter } from "next/navigation";
-import React, { useRef, useState } from "react";
 import * as Yup from "yup";
 
-const EventForm = () => {
+type Props = { forEditData: TEvent };
+
+const EventEditForm = ({ forEditData }: Props) => {
   const [isTypeFree, setTypeFree] = useState(false);
 
   const imageRef = useRef<HTMLInputElement>(null);
@@ -15,26 +19,28 @@ const EventForm = () => {
   const router = useRouter();
 
   const initialValues = {
-    title: "",
-    city: "",
-    location: "",
-    address: "",
-    start_event: "",
-    end_event: "",
-    description: "",
-    terms_conditions: "",
-    category: "",
-    type: "",
-    ticket_available: 0,
-    ticket_price: 0,
-    max_buy: "",
-    promotion: "",
-    start_promo: "",
-    end_promo: "",
-    image: null,
-    image_url:
-      "https://dinkes.dairikab.go.id/wp-content/uploads/sites/12/2022/03/default-img.gif",
+    title: forEditData?.title || "",
+    city: forEditData?.city || "",
+    location: forEditData?.location || "",
+    address: forEditData?.address || "",
+    start_event: forEditData?.start_event || new Date(),
+    end_event: forEditData?.end_event || new Date(),
+    description: forEditData?.description || "",
+    terms_conditions: forEditData?.terms_conditions || "",
+    category: forEditData?.category || "",
+    type: forEditData?.type || "",
+    ticket_available: forEditData?.ticket_available || 0,
+    ticket_price: forEditData?.ticket_price || 0,
+    max_buy: forEditData?.max_buy || "one",
+    promotion: forEditData?.promotion || "",
+    start_promo: forEditData?.start_promo || new Date(),
+    end_promo: forEditData?.end_promo || new Date(),
+    image: forEditData?.image || "",
+    image_url: forEditData?.image_url || "",
+    // image_url:
+    //   "https://dinkes.dairikab.go.id/wp-content/uploads/sites/12/2022/03/default-img.gif",
   };
+
   const formik = useFormik({
     initialValues,
     validationSchema: Yup.object().shape({
@@ -49,7 +55,7 @@ const EventForm = () => {
       ticket_price: Yup.number().required(),
       description: Yup.string().required(),
       terms_conditions: Yup.string().required(),
-      category: Yup.string().oneOf(["Music", "Workshop", "Sport"]).required(),
+      category: Yup.string().oneOf(["Music", "Category", "Sport"]).required(),
       promotion: Yup.string().oneOf([
         "five",
         "ten",
@@ -59,21 +65,27 @@ const EventForm = () => {
         "forty",
         "fifty",
       ]),
-      start_promo: Yup.date(),
-      end_promo: Yup.date(),
+      start_promo: Yup.string(),
+      end_promo: Yup.string(),
       max_buy: Yup.string()
         .oneOf(["one", "two", "three", "four", "five"])
         .required(),
     }),
-    onSubmit: async (values) => {
+    onSubmit: async (values): Promise<void> => {
       try {
+        console.log("this when i trigger the button");
+
         const newEvent = new FormData();
+
+        const startEventDate = new Date(values.start_event);
+        const endEventDate = new Date(values.end_event);
+
         newEvent.append("title", values.title);
         newEvent.append("city", values.city);
         newEvent.append("location", values.location);
         newEvent.append("address", values.address);
-        newEvent.append("start_event", values.start_event);
-        newEvent.append("end_event", values.end_event);
+        newEvent.append("start_event", startEventDate.toISOString());
+        newEvent.append("end_event", endEventDate.toISOString());
         newEvent.append("description", values.description);
         newEvent.append("terms_conditions", values.terms_conditions);
         newEvent.append("category", values.category);
@@ -87,8 +99,14 @@ const EventForm = () => {
 
         if (values.promotion) {
           newEvent.append("promotion", values.promotion);
-          newEvent.append("start_promo", values.start_promo);
-          newEvent.append("end_promo", values.end_promo);
+          if (values.start_promo) {
+            const startPromoDate = new Date(values.start_promo);
+            newEvent.append("start_promo", startPromoDate.toISOString());
+          }
+          if (values.end_promo) {
+            const endPromoDate = new Date(values.end_promo);
+            newEvent.append("end_promo", endPromoDate.toISOString());
+          }
         }
         if (values.image) newEvent.append("image", values.image);
 
@@ -96,8 +114,10 @@ const EventForm = () => {
           "Data yang diinput:",
           Object.fromEntries(newEvent.entries())
         );
-
-        const { data } = await axiosInstance().post("/events/e1", newEvent);
+        const { data } = await axiosInstance().patch(
+          `/events/${forEditData.id}`,
+          newEvent
+        );
         alert(data.message);
         router.push("/dashboard/my-event");
       } catch (error) {
@@ -106,6 +126,36 @@ const EventForm = () => {
       }
     },
   });
+
+  useEffect(() => {
+    console.log(forEditData);
+    if (forEditData.id) {
+      formik.setValues({
+        title: forEditData.title,
+        city: forEditData.city,
+        location: forEditData.location,
+        address: forEditData.address,
+        start_event: forEditData.start_event,
+        end_event: forEditData.end_event,
+        description: forEditData.description,
+        terms_conditions: forEditData.terms_conditions,
+        category: forEditData.category,
+        type: forEditData.type,
+        ticket_available: forEditData.ticket_available,
+        ticket_price: forEditData.ticket_price,
+        max_buy: forEditData.max_buy,
+        promotion: forEditData.promotion || "",
+        start_promo: forEditData.start_promo
+          ? forEditData.start_promo.split("T")[0]
+          : "",
+        end_promo: forEditData.end_promo
+          ? forEditData.end_promo.split("T")[0]
+          : "",
+        image: forEditData.image,
+        image_url: forEditData.image,
+      });
+    }
+  }, [forEditData]);
 
   return (
     <>
@@ -321,50 +371,49 @@ const EventForm = () => {
                   )}
                 </div>
               </div>
-              {!isTypeFree && (
-                <div className="flex flex-col gap-2">
-                  <p>Promotion (optional)</p>
-                  <div className="flex gap-5">
-                    <div className="flex flex-col w-60">
-                      <label htmlFor="city">Promotion</label>
-                      <select
-                        id="promotion"
-                        className="bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block p-2.5 w-60"
-                        {...formik.getFieldProps("promotion")}
-                      >
-                        <option value="">Select a promotion</option>
-                        <option value="five">5%</option>
-                        <option value="ten">10&</option>
-                        <option value="fifth_teen">15%</option>
-                        <option value="twenty">20%</option>
-                        <option value="twenty_five">25%</option>
-                        <option value="forty">40%</option>
-                        <option value="fifty">50%</option>
-                      </select>
-                    </div>
-                    <div className="flex flex-col w-60">
-                      <label htmlFor="">Start</label>
-                      <input
-                        type="date"
-                        id="start_promo"
-                        placeholder=""
-                        className="bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5"
-                        {...formik.getFieldProps("start_promo")}
-                      />
-                    </div>
-                    <div className="flex flex-col w-60">
-                      <label htmlFor="">End</label>
-                      <input
-                        type="date"
-                        id="end_promo"
-                        placeholder=""
-                        className="bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5"
-                        {...formik.getFieldProps("end_promo")}
-                      />
-                    </div>
+              <div className="flex flex-col gap-2">
+                <p>Promotion (optional)</p>
+                <div className="flex gap-5">
+                  <div className="flex flex-col w-60">
+                    <label htmlFor="city">Promotion</label>
+                    <select
+                      id="promotion"
+                      className="bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block p-2.5 w-60"
+                      {...formik.getFieldProps("promotion")}
+                      required
+                    >
+                      <option value="">Select a promotion</option>
+                      <option value="five">5%</option>
+                      <option value="ten">10&</option>
+                      <option value="fifth_teen">15%</option>
+                      <option value="twenty">20%</option>
+                      <option value="twenty_five">25%</option>
+                      <option value="forty">40%</option>
+                      <option value="fifty">50%</option>
+                    </select>
+                  </div>
+                  <div className="flex flex-col w-60">
+                    <label htmlFor="">Start</label>
+                    <input
+                      type="date"
+                      id="start_promo"
+                      placeholder=""
+                      className="bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5"
+                      {...formik.getFieldProps("start_promo")}
+                    />
+                  </div>
+                  <div className="flex flex-col w-60">
+                    <label htmlFor="">End</label>
+                    <input
+                      type="date"
+                      id="end_promo"
+                      placeholder=""
+                      className="bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5"
+                      {...formik.getFieldProps("end_promo")}
+                    />
                   </div>
                 </div>
-              )}
+              </div>
             </div>
             <hr className="font-bold my-5" />
             <div className="flex flex-col gap-5">
@@ -395,7 +444,7 @@ const EventForm = () => {
               type="submit"
               className="w-full text-white bg-primary-600 hover:bg-primary-700 focus:ring-4 focus:outline-none focus:ring-primary-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center"
             >
-              Create an event
+              Edit an event
             </button>
           </form>
         </div>
@@ -404,4 +453,4 @@ const EventForm = () => {
   );
 };
 
-export default EventForm;
+export default EventEditForm;

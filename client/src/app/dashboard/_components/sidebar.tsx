@@ -34,7 +34,7 @@ const Sidebar = () => {
           <p className="font-semibold text-xs px-5">Account</p>
           <div className="flex flex-col text-sm">
             <Link
-              href="/dashboard"
+              href="/edit-profile"
               className="flex gap-2 hover:bg-gray-500 px-5 py-2"
             >
               Account Information

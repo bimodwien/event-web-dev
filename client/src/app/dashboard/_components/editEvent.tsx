@@ -1,18 +1,20 @@
 "use client";
 
+import { imgSrc } from "@/app/_components/format";
 import { axiosInstance } from "@/lib/axios";
 import { AxiosError } from "axios";
 import { useFormik } from "formik";
-import { useRouter } from "next/navigation";
-import React, { useRef, useState } from "react";
+import { useParams, useRouter } from "next/navigation";
+import React, { useEffect, useRef, useState } from "react";
 import * as Yup from "yup";
 
-const EventForm = () => {
+const EventEditForm = () => {
   const [isTypeFree, setTypeFree] = useState(false);
-
   const imageRef = useRef<HTMLInputElement>(null);
 
   const router = useRouter();
+  const { eventId } = useParams();
+  const [imagePreview, setImagePreview] = useState<string>("");
 
   const initialValues = {
     title: "",
@@ -31,9 +33,7 @@ const EventForm = () => {
     promotion: "",
     start_promo: "",
     end_promo: "",
-    image: null,
-    image_url:
-      "https://dinkes.dairikab.go.id/wp-content/uploads/sites/12/2022/03/default-img.gif",
+    image: "",
   };
   const formik = useFormik({
     initialValues,
@@ -44,7 +44,7 @@ const EventForm = () => {
       address: Yup.string().required(),
       start_event: Yup.date().required(),
       end_event: Yup.date().required(),
-      type: Yup.string().oneOf(["paid", "free"]).required(),
+      //   type: Yup.string().oneOf(["paid", "free"]).required(),
       ticket_available: Yup.number().required(),
       ticket_price: Yup.number().required(),
       description: Yup.string().required(),
@@ -67,45 +67,105 @@ const EventForm = () => {
     }),
     onSubmit: async (values) => {
       try {
-        const newEvent = new FormData();
-        newEvent.append("title", values.title);
-        newEvent.append("city", values.city);
-        newEvent.append("location", values.location);
-        newEvent.append("address", values.address);
-        newEvent.append("start_event", values.start_event);
-        newEvent.append("end_event", values.end_event);
-        newEvent.append("description", values.description);
-        newEvent.append("terms_conditions", values.terms_conditions);
-        newEvent.append("category", values.category);
-        newEvent.append("type", values.type);
-        newEvent.append("ticket_available", values.ticket_available.toString());
-        newEvent.append(
+        // console.log("form values:", values);
+
+        const editEvent = new FormData();
+        editEvent.append("title", values.title);
+        editEvent.append("city", values.city);
+        editEvent.append("location", values.location);
+        editEvent.append("address", values.address);
+        editEvent.append("start_event", values.start_event);
+        editEvent.append("end_event", values.end_event);
+        editEvent.append("description", values.description);
+        editEvent.append("terms_conditions", values.terms_conditions);
+        editEvent.append("category", values.category);
+        editEvent.append("type", values.type);
+        editEvent.append(
+          "ticket_available",
+          values.ticket_available.toString()
+        );
+        editEvent.append(
           "ticket_price",
           values.type === "free" ? "0" : values.ticket_price.toString()
         );
-        newEvent.append("max_buy", values.max_buy);
+        editEvent.append("max_buy", values.max_buy);
 
         if (values.promotion) {
-          newEvent.append("promotion", values.promotion);
-          newEvent.append("start_promo", values.start_promo);
-          newEvent.append("end_promo", values.end_promo);
+          editEvent.append("promotion", values.promotion);
+          editEvent.append("start_promo", values.start_promo);
+          editEvent.append("end_promo", values.end_promo);
         }
-        if (values.image) newEvent.append("image", values.image);
+        if (values.image !== `${imgSrc}${eventId}`) {
+          editEvent.append("image", values.image);
+        }
 
-        console.log(
-          "Data yang diinput:",
-          Object.fromEntries(newEvent.entries())
-        );
+        editEvent.forEach((value, key) => {
+          console.log(`${key}: ${value}`);
+        });
 
-        const { data } = await axiosInstance().post("/events/e1", newEvent);
-        alert(data.message);
-        router.push("/dashboard/my-event");
+        // console.log(
+        //   "Data yang diinput:",
+        //   Object.fromEntries(editEvent.entries())
+        // );
+
+        await axiosInstance().patch(`/events/${eventId}`, editEvent);
+        router.push(`/dashboard/my-event/${eventId}`);
       } catch (error) {
         if (error instanceof AxiosError) alert(error.response?.data?.message);
         else if (error instanceof Error) console.log(error.message);
       }
     },
   });
+
+  useEffect(() => {
+    const fetchEvent = async () => {
+      try {
+        const response = await axiosInstance().get(`/events/${eventId}`);
+        const event = response.data.data;
+        console.log("Fetched event data:", event);
+
+        if (event.id) {
+          formik.setValues({
+            image: `${imgSrc}${event.id}`,
+            title: event.title,
+            description: event.description,
+            terms_conditions: event.terms_conditions,
+            location: event.location,
+            address: event.address,
+            city: event.city,
+            start_event: event.start_event,
+            end_event: event.end_event,
+            category: event.category,
+            type: event.type,
+            ticket_available: event.ticket_available,
+            ticket_price: event.ticket_price,
+            max_buy: event.max_buy,
+            promotion: event.promotion || "",
+            start_promo: event.start_promo || "",
+            end_promo: event.end_promo || "",
+          });
+        }
+        setImagePreview(`${imgSrc}${event.id}`);
+
+        console.log(event.image);
+      } catch (error) {
+        console.error("Error fetching event data:", error);
+      }
+    };
+
+    fetchEvent();
+  }, [eventId]);
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.currentTarget.files && e.currentTarget.files[0];
+    if (file) {
+      formik.setFieldValue("image", file);
+
+      const img_url = URL.createObjectURL(file);
+
+      setImagePreview(img_url);
+    }
+  };
 
   return (
     <>
@@ -119,19 +179,11 @@ const EventForm = () => {
                   ref={imageRef}
                   hidden
                   accept="image/*"
-                  onChange={(e) => {
-                    if (e.target.files && e.target.files.length > 0) {
-                      formik.setFieldValue("image", e.target.files[0]);
-                      formik.setFieldValue(
-                        "image_url",
-                        window.URL.createObjectURL(e.target.files[0])
-                      );
-                    }
-                  }}
+                  onChange={handleFileChange}
                 />
 
                 <img
-                  src={formik.values.image_url}
+                  src={imagePreview}
                   onClick={() => imageRef.current?.click()}
                   alt=""
                   className="w-[600px] h-72 object-cover"
@@ -143,8 +195,9 @@ const EventForm = () => {
                   id="title"
                   placeholder="Event Title"
                   className="bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm md:text-xl rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-96 p-2.5"
-                  {...formik.getFieldProps("title")}
-                  required
+                  onChange={formik.handleChange}
+                  onBlur={formik.handleBlur}
+                  value={formik.values.title}
                 />
               </div>
               <div className="flex gap-2 items-center">
@@ -152,8 +205,9 @@ const EventForm = () => {
                 <select
                   id="category"
                   className="bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block p-2.5 w-60"
-                  {...formik.getFieldProps("category")}
-                  required
+                  onChange={formik.handleChange}
+                  onBlur={formik.handleBlur}
+                  value={formik.values.category}
                 >
                   <option value="">Select a category</option>
                   <option value="Music">Music</option>
@@ -174,8 +228,15 @@ const EventForm = () => {
                       id="start_event"
                       placeholder=""
                       className="bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5"
-                      {...formik.getFieldProps("start_event")}
-                      required
+                      onChange={formik.handleChange}
+                      onBlur={formik.handleBlur}
+                      value={
+                        formik.values.start_event
+                          ? new Date(formik.values.start_event)
+                              .toISOString()
+                              .slice(0, 16)
+                          : ""
+                      }
                     />
                   </div>
                   <div className="flex flex-col w-60">
@@ -185,8 +246,15 @@ const EventForm = () => {
                       id="end_event"
                       placeholder=""
                       className="bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5"
-                      {...formik.getFieldProps("end_event")}
-                      required
+                      onChange={formik.handleChange}
+                      onBlur={formik.handleBlur}
+                      value={
+                        formik.values.end_event
+                          ? new Date(formik.values.end_event)
+                              .toISOString()
+                              .slice(0, 16)
+                          : ""
+                      }
                     />
                   </div>
                 </div>
@@ -199,8 +267,9 @@ const EventForm = () => {
                     <select
                       id="city"
                       className="bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block p-2.5 w-60"
-                      {...formik.getFieldProps("city")}
-                      required
+                      onChange={formik.handleChange}
+                      onBlur={formik.handleBlur}
+                      value={formik.values.city}
                     >
                       <option value="">Select a city</option>
                       <option value="Jakarta">JAKARAT</option>
@@ -215,8 +284,9 @@ const EventForm = () => {
                       id="location"
                       placeholder=""
                       className="bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5"
-                      {...formik.getFieldProps("location")}
-                      required
+                      onChange={formik.handleChange}
+                      onBlur={formik.handleBlur}
+                      value={formik.values.location}
                     />
                   </div>
                   <div className="flex flex-col w-60">
@@ -226,8 +296,9 @@ const EventForm = () => {
                       id="address"
                       placeholder=""
                       className="bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5"
-                      {...formik.getFieldProps("address")}
-                      required
+                      onChange={formik.handleChange}
+                      onBlur={formik.handleBlur}
+                      value={formik.values.address}
                     />
                   </div>
                 </div>
@@ -249,6 +320,7 @@ const EventForm = () => {
                         formik.setFieldValue("type", "paid");
                         setTypeFree(false);
                       }}
+                      onBlur={formik.handleBlur}
                       className="w-4 h-4 border border-gray-300 rounded bg-gray-50 focus:ring-3 focus:ring-primary-300"
                     />
                     <div>
@@ -268,6 +340,7 @@ const EventForm = () => {
                         formik.setFieldValue("type", "free");
                         setTypeFree(true);
                       }}
+                      onBlur={formik.handleBlur}
                       className="w-4 h-4 border border-gray-300 rounded bg-gray-50 focus:ring-3 focus:ring-primary-300"
                     />
                     <div>
@@ -286,8 +359,9 @@ const EventForm = () => {
                       id="ticket_available"
                       placeholder=""
                       className="bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5"
-                      {...formik.getFieldProps("ticket_available")}
-                      required
+                      onChange={formik.handleChange}
+                      onBlur={formik.handleBlur}
+                      value={formik.values.ticket_available}
                     />
                   </div>
                   <div className="flex flex-col w-60">
@@ -295,8 +369,9 @@ const EventForm = () => {
                     <select
                       id="max_buy"
                       className="bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block p-2.5 w-60"
-                      {...formik.getFieldProps("max_buy")}
-                      required
+                      onChange={formik.handleChange}
+                      onBlur={formik.handleBlur}
+                      value={formik.values.max_buy}
                     >
                       <option value="">Select a limit</option>
                       <option value="one">one</option>
@@ -314,8 +389,9 @@ const EventForm = () => {
                         id="ticket_price"
                         placeholder=""
                         className="bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5"
-                        {...formik.getFieldProps("ticket_price")}
-                        required
+                        onChange={formik.handleChange}
+                        onBlur={formik.handleBlur}
+                        value={formik.values.ticket_price}
                       />
                     </div>
                   )}
@@ -330,11 +406,13 @@ const EventForm = () => {
                       <select
                         id="promotion"
                         className="bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block p-2.5 w-60"
-                        {...formik.getFieldProps("promotion")}
+                        onChange={formik.handleChange}
+                        onBlur={formik.handleBlur}
+                        value={formik.values.promotion}
                       >
                         <option value="">Select a promotion</option>
                         <option value="five">5%</option>
-                        <option value="ten">10&</option>
+                        <option value="ten">10%</option>
                         <option value="fifth_teen">15%</option>
                         <option value="twenty">20%</option>
                         <option value="twenty_five">25%</option>
@@ -349,7 +427,16 @@ const EventForm = () => {
                         id="start_promo"
                         placeholder=""
                         className="bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5"
-                        {...formik.getFieldProps("start_promo")}
+                        onChange={formik.handleChange}
+                        onBlur={formik.handleBlur}
+                        disabled={formik.values.type === "FREE"}
+                        value={
+                          formik.values.start_promo
+                            ? new Date(formik.values.start_promo)
+                                .toISOString()
+                                .slice(0, 10)
+                            : ""
+                        }
                       />
                     </div>
                     <div className="flex flex-col w-60">
@@ -359,7 +446,15 @@ const EventForm = () => {
                         id="end_promo"
                         placeholder=""
                         className="bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5"
-                        {...formik.getFieldProps("end_promo")}
+                        onChange={formik.handleChange}
+                        onBlur={formik.handleBlur}
+                        value={
+                          formik.values.end_promo
+                            ? new Date(formik.values.end_promo)
+                                .toISOString()
+                                .slice(0, 10)
+                            : ""
+                        }
                       />
                     </div>
                   </div>
@@ -375,8 +470,9 @@ const EventForm = () => {
                   placeholder="Enter description"
                   className="bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5"
                   rows={10}
-                  {...formik.getFieldProps("description")}
-                  required
+                  onChange={formik.handleChange}
+                  onBlur={formik.handleBlur}
+                  value={formik.values.description}
                 ></textarea>
               </div>
               <div className="flex flex-col w-full">
@@ -386,8 +482,9 @@ const EventForm = () => {
                   placeholder="Enter T&C"
                   className="bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5"
                   rows={10}
-                  {...formik.getFieldProps("terms_conditions")}
-                  required
+                  onChange={formik.handleChange}
+                  onBlur={formik.handleBlur}
+                  value={formik.values.terms_conditions}
                 ></textarea>
               </div>
             </div>
@@ -404,4 +501,4 @@ const EventForm = () => {
   );
 };
 
-export default EventForm;
+export default EventEditForm;

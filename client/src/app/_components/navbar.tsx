@@ -5,11 +5,15 @@ import { AiOutlineSearch } from "react-icons/ai";
 import Logout from "./logout";
 import { IoAdd } from "react-icons/io5";
 import SearchOnNavbar from "./searchNav";
+import Link from "next/link";
+import { useAppSelector } from "@/lib/redux/hooks";
 
 const Navbar = () => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const userPhotoRef = useRef<HTMLButtonElement>(null);
+
+  const user = useAppSelector((state) => state.auth);
 
   const toggleDropdown = () => {
     setIsDropdownOpen((prev) => !prev);
@@ -60,7 +64,7 @@ const Navbar = () => {
             <span className="sr-only">Open user menu</span>
             <img
               className="w-8 h-8 rounded-full"
-              src="https://static.vecteezy.com/system/resources/thumbnails/009/292/244/small/default-avatar-icon-of-social-media-user-vector.jpg"
+              src={`http://localhost:8001/users/avatar/${user.avatarUrl}`}
               alt="user photo"
             />
           </button>
@@ -71,23 +75,25 @@ const Navbar = () => {
               id="user-dropdown"
             >
               <div className="px-4 py-3">
-                <span className="block text-sm text-white">Bonnie Green</span>
-                <span className="block text-xs  truncate text-gray-400">
-                  name@mail.com
+                <span className="block text-sm text-white">
+                  {user.username}
+                </span>
+                <span className="block text-xs truncate text-gray-400">
+                  {user.email}
                 </span>
               </div>
               <ul className="py-2 w-52">
                 <li>
-                  <a
-                    href="/edit-profile"
+                  <Link
+                    href={"/edit-profile"}
                     className="block px-4 py-2 text-sm  hover:bg-gray-600 text-white"
                   >
                     Edit Profile
-                  </a>
+                  </Link>
                 </li>
                 <li>
                   <button className="block mx-3 mt-4 py-1 px-2 text-sm rounded bg-red-700 hover:bg-red-600 text-white">
-                    <Logout />
+                    <Logout title="Logout" />
                   </button>
                 </li>
               </ul>

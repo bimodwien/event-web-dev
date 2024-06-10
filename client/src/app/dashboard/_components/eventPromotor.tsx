@@ -5,12 +5,11 @@ import dayjs from "dayjs";
 import React, { useState, useEffect } from "react";
 import relativeTime from "dayjs/plugin/relativeTime";
 import Link from "next/link";
+import { formatPrice, imgSrc } from "@/app/_components/format";
 
 const EventPromotor = () => {
   dayjs.extend(relativeTime);
   const [eventData, setEventData] = useState<any[]>([]);
-
-  console.log(eventData);
 
   const fetchEventData = async () => {
     try {
@@ -24,6 +23,7 @@ const EventPromotor = () => {
 
   useEffect(() => {
     fetchEventData();
+    console.log("ini adalah event data", eventData);
   }, []);
 
   return (
@@ -35,7 +35,7 @@ const EventPromotor = () => {
           className="flex flex-col rounded-lg w-60 overflow-hidden shadow"
         >
           <img
-            src={`http://localhost:8001/events/image/${event.id}`}
+            src={`${imgSrc}${event.id}`}
             alt=""
             className="w-full h-36 object-cover"
           />
@@ -44,9 +44,21 @@ const EventPromotor = () => {
             <p className="text-gray-400 text-sm">
               {dayjs(event.start_event).format("DD MMMM YYYY")}
             </p>
-            <p className="font-semibold text-sm">
-              Rp. {Number(event.ticket_price).toLocaleString()}
-            </p>
+            {event.type === "free" ? (
+              <p className="font-semibold text-sm">Free</p>
+            ) : (
+              <>
+                {event.promotion ? (
+                  <p className="font-semibold text-sm">
+                    Rp {formatPrice(event.promo_price)}
+                  </p>
+                ) : (
+                  <p className="font-semibold text-sm">
+                    Rp {formatPrice(event.ticket_price)}
+                  </p>
+                )}
+              </>
+            )}
           </div>
         </Link>
       ))}

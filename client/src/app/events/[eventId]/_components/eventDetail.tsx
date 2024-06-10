@@ -8,6 +8,7 @@ import dayjs from "dayjs";
 
 import relativeTime from "dayjs/plugin/relativeTime";
 import { BiSolidCategoryAlt } from "react-icons/bi";
+import { avatar, imgSrc } from "@/app/_components/format";
 
 export default function EventDetails() {
   dayjs.extend(relativeTime);
@@ -40,7 +41,8 @@ export default function EventDetails() {
         <div className="flex flex-col gap-10">
           <div className="flex gap-10">
             <img
-              src={`http://localhost:8001/events/image/${eventData.id}`}
+              // src={`http://localhost:8001/events/image/${eventData.id}`}
+              src={`${imgSrc}${eventData.id}`}
               alt=""
               className="w-[750px] h-[350px] object-cover rounded-lg"
             />
@@ -78,7 +80,7 @@ export default function EventDetails() {
                 <hr className="py-2" />
                 <div className="flex gap-3">
                   <img
-                    src="https://www.adobe.com/content/dam/cc/us/en/creativecloud/photography/discover/concert-photography/thumbnail.jpeg"
+                    src={`${avatar}${eventData.user.id}`}
                     alt=""
                     className="rounded-full w-12 h-12 object-cover"
                   />

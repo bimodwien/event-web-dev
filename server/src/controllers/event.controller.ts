@@ -64,6 +64,8 @@ class EventController {
 
   async createEvent(req: Request, res: Response, next: NextFunction) {
     try {
+      console.log("masuk kedalam controller create event");
+
       await eventService.createEvent(req);
       res.status(201).send({
         message: "new event created",

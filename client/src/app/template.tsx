@@ -14,11 +14,15 @@ export default function ResponsiveNavWrapper({ children }: Props) {
     pathname === "/dashboard" ||
     pathname.startsWith("/dashboard/");
 
+  pathname === "/reset-password" ||
+    pathname === "/verification" ||
+    pathname === "/reset-token" ||
+    pathname === "/dashboard/create-event";
   return (
     <main>
       {!isCustomer && <Navbar />}
       {children}
-      <Footer />
+      {/* <Footer /> */}
     </main>
   );
 }

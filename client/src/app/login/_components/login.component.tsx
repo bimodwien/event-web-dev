@@ -91,12 +91,13 @@ const LoginForm = () => {
                   {/* <div className="flex items-start">
    
                   </div> */}
-                  <a
-                    href=""
+
+                  <Link
+                    href={"/reset-password"}
                     className="text-md font-medium text-primary-600 hover:underline"
                   >
-                    Forgot Password?
-                  </a>
+                    Forgot Password
+                  </Link>
                 </div>
                 <button
                   type="submit"
