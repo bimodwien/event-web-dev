@@ -69,6 +69,7 @@ class UserService {
           OR: [{ username }, { email }],
         },
       });
+
       if (existingUser) throw new ValidationError("User has been used");
 
       const hashed = await hashPassword(String(password));
@@ -133,7 +134,13 @@ class UserService {
   static async emailVerification(req: Request) {
     const token =
       req.headers.authorization?.replace("Bearer ", "").toString() || "";
+
+    console.log("ini token: ", token);
+
     const { id } = verify(token, SECRET_KEY) as TUser;
+
+    console.log("ini ID: ", id);
+
     const data = await prisma.user.update({
       where: {
         id: id,
@@ -142,6 +149,8 @@ class UserService {
         isVerified: true,
       },
     });
+
+    console.log("ini data: ", data);
 
     return data;
   }
@@ -235,9 +244,11 @@ class UserService {
   static async render(req: Request) {
     const data = await prisma.user.findUnique({
       where: {
-        id: req.params.id,
+        avatarUrl: req.params.id,
       },
     });
+    console.log(data, "ini data");
+
     return data?.imageProfile;
   }
 
@@ -265,6 +276,8 @@ class UserService {
 
       data.imageProfile = buffer;
       data.avatarUrl = String(req.user.id) + new Date().getTime();
+
+      console.log("ini data avatar url", data.avatarUrl);
     }
     await prisma.user.update({
       data,
@@ -289,9 +302,12 @@ class UserService {
         avatarUrl: true,
       },
       where: {
+        avatarUrl: req.user.id,
         id: req.user.id,
       },
     });
+    console.log("ini avatarUrl", user?.avatarUrl);
+
     return createToken(
       {
         user,

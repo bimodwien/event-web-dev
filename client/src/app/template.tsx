@@ -12,12 +12,13 @@ export default function ResponsiveNavWrapper({ children }: Props) {
     pathname === "/login" ||
     pathname === "/register" ||
     pathname === "/dashboard" ||
-    pathname.startsWith("/dashboard/");
-
-  pathname === "/reset-password" ||
+    pathname === "/verify-user" ||
+    pathname === "/reset-password" ||
     pathname === "/verification" ||
     pathname === "/reset-token" ||
-    pathname === "/dashboard/create-event";
+    pathname === "/dashboard/create-event" ||
+    pathname.startsWith("/dashboard/");
+
   return (
     <main>
       {!isCustomer && <Navbar />}
