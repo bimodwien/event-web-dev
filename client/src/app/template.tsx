@@ -2,7 +2,8 @@
 
 import { usePathname } from "next/navigation";
 import Navbar from "./_components/navbar";
-import Sidebar from "./_components/sidebar";
+import Sidebar from "./dashboard/_components/sidebar";
+import Footer from "./_components/footer";
 
 type Props = { children: React.ReactNode };
 export default function ResponsiveNavWrapper({ children }: Props) {
@@ -13,7 +14,7 @@ export default function ResponsiveNavWrapper({ children }: Props) {
     pathname === "/dashboard" ||
     pathname.startsWith("/dashboard/");
 
-    pathname === "/reset-password" ||
+  pathname === "/reset-password" ||
     pathname === "/verification" ||
     pathname === "/reset-token" ||
     pathname === "/dashboard/create-event";
@@ -21,6 +22,7 @@ export default function ResponsiveNavWrapper({ children }: Props) {
     <main>
       {!isCustomer && <Navbar />}
       {children}
+      {/* <Footer /> */}
     </main>
   );
 }

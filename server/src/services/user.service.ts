@@ -235,7 +235,7 @@ class UserService {
   static async render(req: Request) {
     const data = await prisma.user.findUnique({
       where: {
-        avatarUrl: req.params.id,
+        id: req.params.id,
       },
     });
     return data?.imageProfile;

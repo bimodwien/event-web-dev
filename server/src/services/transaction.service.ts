@@ -1,44 +1,81 @@
-"use strict";
 import { Request } from "express";
-import { PrismaClient } from "@prisma/client";
-
-const prisma = new PrismaClient();
+import prisma from "../lib/prisma";
 class TransactionService {
-  static async getAll() {
-    const data = await prisma.transaction.findMany({
-      select: {
-        id: true,
-        status: true,
-        paid_at: true,
-        total_price: true,
-        total_ticket: true,
-        event: {
-          select: {
-            id: true,
-            title: true,
-            start_event: true,
-            end_event: true,
-          },
-        },
-        user: {
-          select: {
-            id: true,
-            username: true,
-          },
-        },
-      },
+  async getAll(req: Request) {
+    const data = await prisma.event.findMany({
+      orderBy: { createdAt: "desc" },
     });
+
     return data;
   }
 
-  static async getDetail(req: Request) {
-    const { id } = req.params;
-    const data = await prisma.transaction.findFirst({
+  async getByCustomer(req: Request) {
+    const data = await prisma.transaction.findMany({
+      where: { userId: req.user.id },
+      orderBy: { createdAt: "desc" },
+    });
+
+    return data;
+  }
+
+  async getByEvent(req: Request) {
+    const { eventId } = req.params;
+    const data = await prisma.transaction.findMany({
+      where: { eventId: eventId },
+      orderBy: { createdAt: "desc" },
+    });
+
+    return data;
+  }
+
+  async getByOrganizer(req: Request) {
+    const data = await prisma.transaction.findMany({
       where: {
-        id,
+        event: { userId: req.user.id },
       },
+      orderBy: { createdAt: "desc" },
+    });
+
+    return data;
+  }
+
+  async getDetail(req: Request) {
+    const { id } = req.params;
+    const data = await prisma.transaction.findUnique({
+      where: { id: id },
+    });
+
+    return data;
+  }
+
+  async create(req: Request) {
+    const { eventId, total_ticket, point, voucher } = req.body;
+
+    // if (!total_ticket || !eventId) {
+    //   throw new Error("Missing required fields");
+    // }
+
+    // let max = event.
+
+    if (total_ticket < 1) {
+      throw new Error("input amount");
+    }
+  }
+
+  async update(req: Request) {}
+
+  async delete(req: Request) {
+    const { transactionId } = req.params;
+    const existingTransaction = await prisma.transaction.findUnique({
+      where: { id: transactionId },
+    });
+
+    if (!existingTransaction) throw new Error("transaction not found");
+
+    return await prisma.transaction.delete({
+      where: { id: transactionId },
     });
   }
 }
 
-export default TransactionService;
+export default new TransactionService();

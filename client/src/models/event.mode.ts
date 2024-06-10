@@ -15,6 +15,7 @@ export type TEvent = {
   type: string;
   ticket_available: number;
   ticket_price: number;
+  promo_price: number;
   promotion?: string;
   start_promo?: string;
   end_promo?: string;
