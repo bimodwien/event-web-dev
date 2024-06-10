@@ -1,5 +1,6 @@
 import { Request } from "express";
 import prisma from "../lib/prisma";
+import { MaxBuy } from "@prisma/client";
 class TransactionService {
   async getAll(req: Request) {
     const data = await prisma.event.findMany({
@@ -49,16 +50,52 @@ class TransactionService {
   }
 
   async create(req: Request) {
-    const { eventId, total_ticket, point, voucher } = req.body;
+    const { eventId } = req.params;
+    const { total_ticket, point, voucher } = req.body;
 
-    // if (!total_ticket || !eventId) {
-    //   throw new Error("Missing required fields");
-    // }
+    // cek user poin ada apa ga
+    if (!req.user || req.user.point === undefined) {
+      throw new Error("User/ point not found");
+    }
 
-    // let max = event.
+    const maxBuy: { [key in MaxBuy]: number } = {
+      one: 1,
+      two: 2,
+      three: 3,
+      four: 4,
+      five: 5,
+    };
 
-    if (total_ticket < 1) {
-      throw new Error("input amount");
+    const limit = maxBuy[req.event.max_buy as MaxBuy];
+
+    // harus input jumlah tiket yang dibeli
+    if (typeof total_ticket !== "number" || total_ticket < 1) {
+      throw new Error("Masukkan jumlah tiket yang valid");
+    }
+
+    // jumlah tiket tidak lebih dari max buy
+    if (total_ticket > limit) {
+      throw new Error("Jumlah tiket melebihi batas pembelian");
+    }
+    let totalPrice;
+
+    // kalo type event free maka price 0 & ga bisa pakai point/voucher
+    if (req.event.type === "free") {
+      totalPrice = 0;
+      if (point || voucher) {
+        throw new Error("point and voucher can't be use in this type event");
+      }
+    }
+
+    // kalo type paid maka price = tiket price / promo price
+    // klo ada, mau pakai point / voucher *salah satu
+    else if (req.event.type === "paid") {
+      if (point && voucher) {
+        throw new Error("please only chose one");
+      } else if (point) {
+        totalPrice = total_ticket * req.event.ticket_price - req.user.point;
+      } else if (voucher) {
+      }
     }
   }
 

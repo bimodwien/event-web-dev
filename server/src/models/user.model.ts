@@ -13,7 +13,7 @@ export type TUser = {
   role?: string;
   referralCode?: string;
   referenceCode?: string;
-  pointBalance?: number;
+  point?: number;
   pointExpiry?: Date;
 };
 

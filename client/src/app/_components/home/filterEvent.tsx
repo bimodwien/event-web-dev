@@ -116,7 +116,7 @@ const EventList = () => {
                 <hr className="mt-5" />
                 <div className="flex gap-2 items-center">
                   <img
-                    src={`${avatar}${event.user.id}`}
+                    src={`${avatar}${event.user.avatarUrl}`}
                     alt=""
                     className="rounded-full w-8 h-8 object-cover"
                   />

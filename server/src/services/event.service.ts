@@ -20,7 +20,7 @@ class EventService {
         promo_price: true,
         type: true,
         promotion: true,
-        user: { select: { id: true, name: true } },
+        user: { select: { id: true, name: true, avatarUrl: true } },
       },
     });
     return data;
@@ -90,7 +90,7 @@ class EventService {
         type: true,
         promotion: true,
         category: true,
-        user: { select: { id: true, name: true } },
+        user: { select: { id: true, name: true, avatarUrl: true } },
       },
       orderBy: {
         createdAt: "desc",
