@@ -14,7 +14,6 @@ class ReviewService {
       select: {
         id: true,
         rating: true,
-        total_rating: true,
         review_text: true,
         user: true,
         event: true,
@@ -26,8 +25,8 @@ class ReviewService {
   static async getReviewByEvent(req: Request) {}
 
   static async create(req: Request) {
-    const { rating, review_text, total_rating } = req.body as TReview;
-    // const { userId } = req.user?.id;
+    const { rating, review_text } = req.body as TReview;
+    const userId = req.user?.id;
     const { eventId } = req.params;
 
     const existingEvent = await prisma.event.findFirst({
@@ -48,7 +47,7 @@ class ReviewService {
     const transaction = await prisma.transaction.findFirst({
       where: {
         eventId,
-        // userId,
+        userId,
         status: "paid",
       },
     });
@@ -56,17 +55,25 @@ class ReviewService {
       throw new Error("User did not attend the event");
     }
 
-    const data = {
-      //   userId,
-      eventId,
+    const data: Prisma.ReviewCreateInput = {
+      user: {
+        connect: {
+          id: userId,
+        },
+      },
+      event: {
+        connect: {
+          id: eventId,
+        },
+      },
       rating,
       review_text,
     };
 
-    // const review = await prisma.review.create({
-    //   data,
-    // });
-    // return review;
+    const review = await prisma.review.create({
+      data,
+    });
+    return review;
   }
 }
 
