@@ -184,15 +184,16 @@ model Transaction {
 }
 
 model Review {
-  id          String   @id @default(cuid())
-  user        User     @relation(fields: [userId], references: [id])
-  userId      String
-  event       Event    @relation(fields: [eventId], references: [id])
-  eventId     String
-  rating      Int
-  review_text String   @db.Text
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id           String   @id @default(cuid())
+  user         User     @relation(fields: [userId], references: [id])
+  userId       String
+  event        Event    @relation(fields: [eventId], references: [id])
+  eventId      String
+  rating       Int
+  total_rating Int
+  review_text  String   @db.Text
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
 
   @@map("reviews")
 }
