@@ -59,7 +59,6 @@ class UserService {
       const password: string = req.body.password;
       const roleInput: string = req.body.role;
       const referenceCode: string = req.body.referenceCode;
-      // const referralCode = randomBytes(10).toString("hex");
 
       const pointExpiredDate = new Date();
       pointExpiredDate.setMonth(pointExpiredDate.getMonth() + 3);
@@ -140,11 +139,7 @@ class UserService {
     const token =
       req.headers.authorization?.replace("Bearer ", "").toString() || "";
 
-    console.log("ini token: ", token);
-
     const { id } = verify(token, SECRET_KEY) as TUser;
-
-    console.log("ini ID: ", id);
 
     const data = await prisma.user.update({
       where: {
@@ -154,8 +149,6 @@ class UserService {
         isVerified: true,
       },
     });
-
-    console.log("ini data: ", data);
 
     return data;
   }
@@ -252,7 +245,6 @@ class UserService {
         avatarUrl: req.params.id,
       },
     });
-    console.log(data, "ini data");
 
     return data?.imageProfile;
   }
@@ -281,8 +273,6 @@ class UserService {
 
       data.imageProfile = buffer;
       data.avatarUrl = String(req.user.id) + new Date().getTime();
-
-      console.log("ini data avatar url", data.avatarUrl);
     }
     await prisma.user.update({
       data,
@@ -311,7 +301,6 @@ class UserService {
         id: req.user.id,
       },
     });
-    console.log("ini avatarUrl", user?.avatarUrl);
 
     return createToken(
       {
