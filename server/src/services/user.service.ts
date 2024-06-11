@@ -59,7 +59,7 @@ class UserService {
       const password: string = req.body.password;
       const roleInput: string = req.body.role;
       const referenceCode: string = req.body.referenceCode;
-      const referralCode = randomBytes(10).toString("hex");
+      // const referralCode = randomBytes(10).toString("hex");
 
       const pointExpiredDate = new Date();
       pointExpiredDate.setMonth(pointExpiredDate.getMonth() + 3);
@@ -89,6 +89,11 @@ class UserService {
           referralCode: referenceCode,
         },
       });
+
+      const referralCode =
+        role === $Enums.Role.eventOrganizer
+          ? ""
+          : randomBytes(10).toString("hex");
 
       const data: Prisma.UserCreateInput = {
         email,
