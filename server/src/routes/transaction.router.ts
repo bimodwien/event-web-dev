@@ -20,6 +20,12 @@ class TransactionRouter {
   initializedRoutes() {
     this.router.get("/", transactionController.getAll);
 
+    this.router.get(
+      "/customer",
+      verifyCustomer,
+      transactionController.getDetailByCustomer
+    );
+
     this.router.post(
       "/:eventId",
       validateToken,

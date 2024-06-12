@@ -5,10 +5,10 @@ import { TEvent } from "@/models/event.mode";
 import { useParams } from "next/navigation";
 import { useState, useEffect } from "react";
 import dayjs from "dayjs";
-
 import relativeTime from "dayjs/plugin/relativeTime";
 import { BiSolidCategoryAlt } from "react-icons/bi";
 import { avatar, imgSrc } from "@/app/_components/format";
+import { Avatar } from "flowbite-react";
 
 export default function EventDetails() {
   dayjs.extend(relativeTime);
@@ -79,10 +79,13 @@ export default function EventDetails() {
               <div>
                 <hr className="py-2" />
                 <div className="flex gap-3">
-                  <img
-                    src={`${avatar}${eventData.user.id}`}
-                    alt=""
-                    className="rounded-full w-12 h-12 object-cover"
+                  <Avatar
+                    img={
+                      eventData.user.avatarUrl
+                        ? `${avatar}${eventData.user.id}`
+                        : undefined
+                    }
+                    rounded
                   />
                   <div className="flex flex-col">
                     <p className="text-gray-500 text-sm">Hosted by</p>

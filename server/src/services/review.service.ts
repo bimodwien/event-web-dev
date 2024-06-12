@@ -3,7 +3,7 @@
 import { Request } from "express";
 import prisma from "../lib/prisma";
 import { TReview } from "../models/review.model";
-import { $Enums, Prisma } from "@prisma/client";
+import { Prisma } from "@prisma/client";
 
 class ReviewService {
   static async getAll() {
@@ -22,7 +22,40 @@ class ReviewService {
     return data;
   }
 
-  static async getReviewByEvent(req: Request) {}
+  static async getReviewByEvent(req: Request) {
+    const { eventId } = req.params;
+
+    const existingEvent = await prisma.event.findFirst({
+      where: {
+        id: eventId,
+      },
+    });
+
+    if (!existingEvent) {
+      throw new Error("Event not found");
+    }
+
+    const reviews = await prisma.review.findMany({
+      where: {
+        id: eventId,
+      },
+      include: {
+        user: {
+          select: {
+            id: true,
+            username: true,
+          },
+        },
+        event: {
+          select: {
+            id: true,
+            title: true,
+          },
+        },
+      },
+    });
+    return reviews;
+  }
 
   static async create(req: Request) {
     const { rating, review_text } = req.body as TReview;
@@ -39,6 +72,10 @@ class ReviewService {
       throw new Error("Event is not Found");
     }
 
+    if (rating < 1 || rating > 5) {
+      throw new Error("Rating must be between 1 and 5");
+    }
+
     const now = new Date();
     if (now < new Date(existingEvent.end_event)) {
       throw new Error("You can only review after the event has ended");
@@ -52,7 +89,18 @@ class ReviewService {
       },
     });
     if (!transaction) {
-      throw new Error("User did not attend the event");
+      throw new Error("User did not attend this event");
+    }
+
+    const existingReview = await prisma.review.findFirst({
+      where: {
+        userId,
+        eventId,
+      },
+    });
+
+    if (existingReview) {
+      throw new Error("User already reviewed this event");
     }
 
     const data: Prisma.ReviewCreateInput = {

@@ -27,6 +27,18 @@ class TransactionController {
     }
   }
 
+  async getDetailByCustomer(req: Request, res: Response, next: NextFunction) {
+    try {
+      const data = await transactionService.getByCustomer(req);
+      return res.status(200).send({
+        message: "get detail by customer",
+        data,
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
   //   async getByTitle(req: Request, res: Response, next: NextFunction) {
   //     try {
   //       const data = await transactionService.gettransactionByTitle(req);
@@ -102,7 +114,6 @@ class TransactionController {
       await transactionService.delete(req);
       return res.send({
         message: "transaction has been deleted",
-
       });
     } catch (error) {
       next(error);

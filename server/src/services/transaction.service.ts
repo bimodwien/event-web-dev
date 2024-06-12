@@ -12,8 +12,11 @@ class TransactionService {
   }
 
   async getByCustomer(req: Request) {
-    const data = await prisma.transaction.findMany({
-      where: { userId: req.user.id },
+    const userId = req.user?.id;
+    console.log(userId);
+
+    const data = await prisma.transaction.findFirst({
+      where: { userId },
       orderBy: { createdAt: "desc" },
     });
 
