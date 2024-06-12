@@ -11,6 +11,7 @@ import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import Link from "next/link";
 import { avatar, formatPrice, imgSrc } from "../format";
+import { Avatar } from "flowbite-react";
 
 const EventList = () => {
   const [search, setSearch] = useState<string>("");
@@ -115,10 +116,14 @@ const EventList = () => {
 
                 <hr className="mt-5" />
                 <div className="flex gap-2 items-center">
-                  <img
-                    src={`${avatar}${event.user.avatarUrl}`}
-                    alt=""
-                    className="rounded-full w-8 h-8 object-cover"
+                  <Avatar
+                    img={
+                      event.user.avatarUrl
+                        ? `${avatar}${event.user.avatarUrl}`
+                        : undefined
+                    }
+                    rounded
+                    size="sm"
                   />
                   <p>{event.user.name}</p>
                 </div>

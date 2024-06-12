@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import YupPassword from "yup-password";
 import * as Yup from "yup";
 import { useFormik } from "formik";
@@ -33,6 +33,8 @@ const ComponentRegister = () => {
     }),
     onSubmit: async (values) => {
       try {
+        console.log(values, "ini valuesnya");
+
         await axiosInstance().post("/users/v1", values);
         alert("User berhasil Register");
         router.push("/login");
@@ -41,12 +43,15 @@ const ComponentRegister = () => {
         const respBody = (error as any).request.responseText;
         try {
           const respJson = JSON.parse(respBody);
-          alert(`User gagal Register - ${respJson.error}`);
+          alert(`User gagal Register 1 - ${respJson.error}`);
           return;
         } catch (e) {}
-        alert(`User gagal Register - ${(error as any).message}`);
+        alert(`User gagal Register 2 - ${(error as any).message}`);
       }
     },
+  });
+  useEffect(() => {
+    console.log("masuk register");
   });
 
   return (

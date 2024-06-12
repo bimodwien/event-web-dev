@@ -18,6 +18,12 @@ class TransactionRouter {
   }
   initializedRoutes() {
     this.router.get("/", transactionController.getAll);
+    this.router.get(
+      "/point-voucher",
+      validateToken,
+      verifyCustomer,
+      transactionController.getPointVoucher
+    );
 
     this.router.post(
       "/:eventId",

@@ -51,6 +51,8 @@ class UserController {
         data,
       });
     } catch (error) {
+      console.log("ini error: ", error);
+
       next(error);
     }
   }

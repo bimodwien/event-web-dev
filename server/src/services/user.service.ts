@@ -59,7 +59,6 @@ class UserService {
       const password: string = req.body.password;
       const roleInput: string = req.body.role;
       const referenceCode: string = req.body.referenceCode;
-      const referralCode = randomBytes(10).toString("hex");
 
       const pointExpiredDate = new Date();
       pointExpiredDate.setMonth(pointExpiredDate.getMonth() + 3);
@@ -69,6 +68,7 @@ class UserService {
           OR: [{ username }, { email }],
         },
       });
+
       if (existingUser) throw new ValidationError("User has been used");
 
       const hashed = await hashPassword(String(password));
@@ -88,6 +88,11 @@ class UserService {
           referralCode: referenceCode,
         },
       });
+
+      const referralCode =
+        role === $Enums.Role.eventOrganizer
+          ? ""
+          : randomBytes(10).toString("hex");
 
       const data: Prisma.UserCreateInput = {
         email,
@@ -133,7 +138,9 @@ class UserService {
   static async emailVerification(req: Request) {
     const token =
       req.headers.authorization?.replace("Bearer ", "").toString() || "";
+
     const { id } = verify(token, SECRET_KEY) as TUser;
+
     const data = await prisma.user.update({
       where: {
         id: id,
@@ -217,6 +224,8 @@ class UserService {
         address: true,
         phone: true,
         avatarUrl: true,
+        point: true,
+        pointExpiredDate: true,
       },
       where: {
         id: req.user.id,
@@ -238,6 +247,7 @@ class UserService {
         avatarUrl: req.params.id,
       },
     });
+
     return data?.imageProfile;
   }
 
@@ -289,9 +299,11 @@ class UserService {
         avatarUrl: true,
       },
       where: {
+        avatarUrl: req.user.id,
         id: req.user.id,
       },
     });
+
     return createToken(
       {
         user,

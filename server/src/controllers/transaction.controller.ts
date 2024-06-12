@@ -37,30 +37,17 @@ class TransactionController {
   //       next(error);
   //     }
   //   }
-
-  //   async getByPromotor(req: Request, res: Response, next: NextFunction) {
-  //     try {
-  //       const data = await transactionService.getByPromotor(req);
-  //       return res.send({
-  //         message: "your transactions",
-  //         data,
-  //       });
-  //     } catch (error) {
-  //       next(error);
-  //     }
-  //   }
-
-  //   async filtering(req: Request, res: Response, next: NextFunction) {
-  //     try {
-  //       const data = await transactionService.getByFilter(req);
-  //       return res.send({
-  //         message: "fetch all transaction by fillter",
-  //         data,
-  //       });
-  //     } catch (error) {
-  //       next(error);
-  //     }
-  //   }
+  async getPointVoucher(req: Request, res: Response, next: NextFunction) {
+    try {
+      const data = await transactionService.getPointVoucher(req);
+      return res.send({
+        message: "your voucher & poin",
+        data,
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
 
   async createTransaction(req: Request, res: Response, next: NextFunction) {
     try {
