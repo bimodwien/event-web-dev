@@ -5,9 +5,8 @@ import { corsOption } from "./config";
 import cors from "cors";
 import routerUser from "./routes/user.routes";
 import eventRouter from "./routes/event.router";
-import routerTransaction from "./routes/transaction.router";
+import transactionRouter from "./routes/transaction.router";
 import routerReview from "./routes/review.router";
-
 const app = express();
 
 app.use(express.json());
@@ -20,8 +19,9 @@ app.get("/", (req: Request, res: Response) => {
 
 app.use("/users", routerUser);
 app.use("/events", eventRouter.getRouter());
-app.use("/transaction", routerTransaction);
+app.use("/transactions", transactionRouter.getRouter());
 app.use("/reviews", routerReview);
+
 
 app.use((error: unknown, req: Request, res: Response, next: NextFunction) => {
   if (error instanceof Error) {

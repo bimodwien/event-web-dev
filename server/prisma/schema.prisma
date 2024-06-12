@@ -159,23 +159,22 @@ model Event {
 // }
 
 enum Status {
-  unpaid
+  cancelled
   pending
   paid
 }
 
 model Transaction {
-  id           String   @id @default(cuid())
-  event        Event    @relation(fields: [eventId], references: [id])
+  id           String    @id @default(cuid())
+  event        Event     @relation(fields: [eventId], references: [id])
   eventId      String
-  user         User     @relation(fields: [userId], references: [id])
+  user         User      @relation(fields: [userId], references: [id])
   userId       String
   status       Status
-  paid_at      DateTime
-  paid_proof   Bytes    @db.Blob
-  ticketId     String
+  paid_at      DateTime?
+  paid_proof   Bytes?    @db.LongBlob
   total_ticket Int
-  total_price  Float    @db.Double
+  total_price  Float     @db.Double
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

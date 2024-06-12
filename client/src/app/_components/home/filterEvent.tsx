@@ -116,6 +116,7 @@ const EventList = () => {
 
                 <hr className="mt-5" />
                 <div className="flex gap-2 items-center">
+
                   <Avatar
                     img={
                       event.user.avatarUrl
