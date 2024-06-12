@@ -36,6 +36,8 @@ export const verifyCustomer = async (
     },
   });
 
+  console.log("ini user di middleware role", user);
+
   if (!user || user.role !== "customer") {
     return res.status(403).json({
       message: "Unauthorized: Only customer can accses.",

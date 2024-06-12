@@ -13,14 +13,17 @@ class TransactionService {
 
   async getByCustomer(req: Request) {
     const userId = req.user?.id;
-    console.log(userId);
+    console.log(req.user);
 
     const data = await prisma.transaction.findFirst({
-      where: { userId },
+      where: { userId: userId },
       orderBy: { createdAt: "desc" },
     });
 
+    console.log("ini data", data);
+
     return data;
+    // return {};
   }
 
   async getByEvent(req: Request) {

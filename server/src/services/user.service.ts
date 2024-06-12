@@ -224,6 +224,8 @@ class UserService {
         address: true,
         phone: true,
         avatarUrl: true,
+        point: true,
+        pointExpiredDate: true,
       },
       where: {
         id: req.user.id,

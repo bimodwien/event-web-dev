@@ -22,16 +22,17 @@ class TransactionRouter {
 
     this.router.get(
       "/customer",
+      validateToken,
       verifyCustomer,
       transactionController.getDetailByCustomer
     );
 
-    this.router.post(
-      "/:eventId",
-      validateToken,
-      verifyCustomer,
-      transactionController.createTransaction
-    );
+    // this.router.post(
+    //   "/:eventId",
+    //   validateToken,
+    //   verifyCustomer,
+    //   transactionController.createTransaction
+    // );
 
     this.router.patch(
       "/:transactionId",
