@@ -85,6 +85,10 @@ const EditComponent = () => {
   console.log("ini user image profile", user.imageProfile);
   console.log("ini image preview", imagePreview);
 
+  const imageUrl = user.avatarUrl
+    ? `http://localhost:8001/users/avatar/${user.avatarUrl}`
+    : String(imagePreview);
+
   return (
     <>
       <section className="bg-gray-50 p-4 md:p-8">
@@ -95,15 +99,7 @@ const EditComponent = () => {
 
           <form onSubmit={formik.handleSubmit}>
             <div className="flex items-center gap-5 mb-4 md:mb-6">
-              <Avatar
-                size="lg"
-                rounded
-                img={
-                  user.avatarUrl
-                    ? "http://localhost:8001/users/avatar/" + user.avatarUrl
-                    : String(imagePreview)
-                }
-              />
+              <Avatar size="lg" rounded img={imageUrl ? imageUrl : undefined} />
               <div className="w-full">
                 <label
                   htmlFor="your-imageProfile"

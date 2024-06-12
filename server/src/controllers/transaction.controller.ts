@@ -1,3 +1,4 @@
+"use strict";
 import { NextFunction, Request, Response } from "express";
 import transactionService from "../services/transaction.service";
 
@@ -101,10 +102,12 @@ class TransactionController {
       await transactionService.delete(req);
       return res.send({
         message: "transaction has been deleted",
+
       });
     } catch (error) {
       next(error);
     }
   }
 }
+
 export default new TransactionController();

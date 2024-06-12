@@ -1,7 +1,7 @@
 "use client";
 import React from "react";
 import { TEvent } from "../../../models/event.mode";
-import { FiEdit, FiTrash2 } from "react-icons/fi";
+import { Button } from "flowbite-react";
 import { axiosInstance } from "../../../lib/axios";
 import { useRouter } from "next/navigation";
 import dayjs from "dayjs";
@@ -33,24 +33,32 @@ const EventDetailEO = ({ eventData }: Props) => {
             <img
               src={`http://localhost:8001/events/image/${eventData.id}`}
               alt=""
-              className="w-[500px] h-60 object-cover rounded-md"
+              className="w-[1080px] h-[480px] object-cover rounded-md"
             />
-            <p>{eventData.title}</p>
-            <p>{dayjs(eventData.start_event).format("DD MMMM YYYY")}</p>
-            <p>
-              {eventData.location},{eventData.city}
+            <p className="text-4xl tracking-tight font-extrabold text-gray-800 sm:text-5xl md:text-6xl">
+              {eventData.title}
             </p>
-            <Link href={`/dashboard/edit-event/${eventData.id}`}>
-              <FiEdit />
-            </Link>
+            <p className="text-base text-gray-500 sm:text-lg sm:max-w-xl sm:mx-auto md:text-xl lg:mx-0">
+              {dayjs(eventData.start_event).format("DD MMMM YYYY")}
+            </p>
+            <p className="text-base text-gray-500 sm:text-lg sm:max-w-xl sm:mx-auto md:text-xl lg:mx-0">
+              {eventData.location}, {eventData.city}
+            </p>
 
-            <button
-              onClick={() => {
-                handleDelete(eventData.id);
-              }}
-            >
-              <FiTrash2 />
-            </button>
+            <div className="flex gap-3 pt-5">
+              <Button gradientMonochrome="teal">
+                <Link href={`/dashboard/edit-event/${eventData.id}`}>Edit</Link>
+              </Button>
+
+              <Button
+                gradientMonochrome="failure"
+                onClick={() => {
+                  handleDelete(eventData.id);
+                }}
+              >
+                Delete
+              </Button>
+            </div>
           </div>
         )}
       </div>
