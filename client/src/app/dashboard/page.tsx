@@ -1,9 +1,12 @@
 import React from "react";
+import EventReviews from "./_components/eventReviews";
 
 const detail = () => {
   return (
     <>
-      <main className="">halooo </main>
+      <main className="">
+        <EventReviews />
+      </main>
     </>
   );
 };

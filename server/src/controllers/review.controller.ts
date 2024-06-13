@@ -32,6 +32,24 @@ class ReviewController {
     }
   }
 
+  static async getReviewByUser(
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ) {
+    try {
+      console.log("masuk ke controller");
+
+      const response = await ReviewService.getReviewByUser(req);
+      res.status(200).send({
+        message: "fetch by user",
+        response,
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
   static async createReview(req: Request, res: Response, next: NextFunction) {
     try {
       const response = await ReviewService.create(req);

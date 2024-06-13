@@ -45,7 +45,7 @@ class UserService {
     if (!checkUser) throw new ValidationError("Wrong Password");
     delete user.password;
 
-    const access_token = createToken({ user, type: "access-token" }, "15m");
+    const access_token = createToken({ user, type: "access-token" }, "30m");
     const refresh_token = createToken({ user, type: "refresh-token" }, "1hr");
 
     return { access_token, refresh_token };

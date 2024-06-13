@@ -14,7 +14,13 @@ import {
 const routerReview = Router();
 
 routerReview.get("/", ReviewController.getAllReview);
-routerReview.get("/:eventId", validateToken, ReviewController.getReviewByEvent);
+routerReview.get(
+  "/:eventId",
+  validateToken,
+  verifyEventOrganizer,
+  ReviewController.getReviewByUser
+);
+// routerReview.get("/:eventId", validateToken, ReviewController.getReviewByEvent);
 routerReview.post(
   "/:eventId",
   validateToken,

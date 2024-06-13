@@ -1,9 +1,10 @@
 "use client";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { TEvent } from "../../../models/event.mode";
 import { Button } from "flowbite-react";
 import { axiosInstance } from "../../../lib/axios";
 import { useRouter } from "next/navigation";
+import { FaStar, FaRegStar } from "react-icons/fa6";
 import dayjs from "dayjs";
 
 import relativeTime from "dayjs/plugin/relativeTime";
@@ -13,6 +14,9 @@ type Props = { eventData: TEvent };
 
 const EventDetailEO = ({ eventData }: Props) => {
   dayjs.extend(relativeTime);
+
+  // const [reviews, setReviews] = useState<any[]>([]);
+  const [views, setViews] = useState<any[]>([]);
 
   const router = useRouter();
 
@@ -25,6 +29,28 @@ const EventDetailEO = ({ eventData }: Props) => {
       console.log("gagal delete");
     }
   }
+
+  async function fetchReview() {
+    try {
+      const res = await axiosInstance().get(`/reviews/${eventData.id}`);
+      console.log(res.data, "ini res.data");
+      const { response } = res.data;
+      console.log(response, "ini response");
+      // setReviews(response);
+      setViews(response);
+      console.log(views, "ini views");
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
+  useEffect(() => {
+    fetchReview();
+  }, []);
+
+  // useEffect(() => {
+  //   console.log(views, "ini console log di useefect");
+  // }, [views]);
   return (
     <>
       <div className="p-5">
@@ -61,6 +87,24 @@ const EventDetailEO = ({ eventData }: Props) => {
             </div>
           </div>
         )}
+      </div>
+      {/* {views.map((review) => {
+        return <div key={review.id}>{review.text}</div>;
+      })} */}
+
+      <div className="px-5">
+        <h1 className="py-3 font-bold text-4xl">Reviews</h1>
+        <div className="flex flex-col justify-between gap-2 rounded-lg shadow-md p-5 w-full bg-white">
+          <div className="font-semibold text-xl">Liradiy</div>
+          <div className="flex gap-3 text-yellow-200 text-2xl">
+            <FaStar />
+            <FaStar />
+            <FaStar />
+            <FaStar />
+            <FaRegStar />
+          </div>
+          <div>Baguuuusss</div>
+        </div>
       </div>
     </>
   );
