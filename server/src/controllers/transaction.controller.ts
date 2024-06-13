@@ -26,6 +26,18 @@ class TransactionController {
     }
   }
 
+  async getPaymentByBuyer(req: Request, res: Response, next: NextFunction) {
+    try {
+      const data = await transactionService.getByCustomer(req);
+      return res.send({
+        message: "fetch all buyer payment",
+        data,
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
   async getPointVoucher(req: Request, res: Response, next: NextFunction) {
     try {
       const data = await transactionService.getPointVoucher(req);
