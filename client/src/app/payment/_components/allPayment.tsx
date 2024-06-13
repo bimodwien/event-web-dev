@@ -15,9 +15,9 @@ export default function AllPayment() {
     try {
       const response = await axiosInstance().get("/transactions/yours");
       const { data } = response.data;
-      setPaymentData(data);
-      // console.log(response, "ini response");
-      console.log(data);
+      const tempData = setPaymentData(data);
+      console.log(response.data, "ini response");
+      // console.log(data);
     } catch (error) {
       console.error("Error fetching event data:", error);
     }

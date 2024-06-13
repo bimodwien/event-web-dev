@@ -17,7 +17,7 @@ class TransactionService {
     const userId = req.user?.id;
     // console.log(req.user);
 
-    const data = await prisma.transaction.findFirst({
+    const data = await prisma.transaction.findMany({
       where: {
         userId: userId,
       },
