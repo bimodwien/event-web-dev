@@ -15,20 +15,12 @@ class TransactionService {
 
   async getByCustomer(req: Request) {
     const userId = req.user?.id;
-    console.log(req.user);
+    // console.log(req.user);
 
     const data = await prisma.transaction.findFirst({
-      where: { userId: userId },
-      include: {
-        event: {
-          select: {
-            id: true,
-            image: true,
-            title: true,
-          },
-        },
+      where: {
+        userId: userId,
       },
-      orderBy: { createdAt: "desc" },
       select: {
         id: true,
         no_inv: true,
@@ -39,22 +31,26 @@ class TransactionService {
         event: {
           select: {
             id: true,
+            image: true,
             title: true,
             ticket_price: true,
             start_event: true,
             end_event: true,
-            user: {
-              select: {
-                id: true,
-                name: true,
-              },
-            },
+          },
+        },
+        user: {
+          select: {
+            id: true,
+            name: true,
           },
         },
       },
+      orderBy: {
+        createdAt: "desc",
+      },
     });
 
-    console.log("ini data", data);
+    // console.log("ini data", data);
 
     return data;
     // return {};
@@ -183,7 +179,6 @@ class TransactionService {
       throw new Error("jumlah tiket melebihi stock tersedia");
     }
     if (parsedTotalTicket > limit) {
-
       // jumlah tiket tidak lebih dari max buy
       throw new Error("Jumlah tiket melebihi batas pembelian");
     }
@@ -204,11 +199,11 @@ class TransactionService {
       checkPrice = event.ticket_price ?? 0;
     }
 
-    console.log("check price: ", checkPrice);
+    // console.log("check price: ", checkPrice);
 
     totalPrice = parsedTotalTicket * checkPrice;
 
-    console.log("total price: ", totalPrice);
+    // console.log("total price: ", totalPrice);
 
     // kalo type free maka price 0 & ga bisa pakai point/voucher
     if (event.type === "free") {
@@ -216,7 +211,7 @@ class TransactionService {
       if (point || voucher) {
         throw new Error("point and voucher can't be use in this type event");
       }
-      console.log("price free", totalPrice);
+      // console.log("price free", totalPrice);
     }
 
     // kalo type paid maka price = tiket price / promo price
@@ -235,7 +230,7 @@ class TransactionService {
 
         const voucherPrice = totalPrice * 0.1;
         totalPrice -= voucherPrice;
-        console.log("voucher: ", totalPrice);
+        // console.log("voucher: ", totalPrice);
 
         await prisma.voucher.update({
           where: { userId: req.user.id },
@@ -245,8 +240,8 @@ class TransactionService {
           },
         });
       } else if (point) {
-        console.log(req.user.point);
-        console.log(req.user.pointExpiredDate);
+        // console.log(req.user.point);
+        // console.log(req.user.pointExpiredDate);
 
         if (!req.user?.point || req.user?.point === 0) {
           throw new Error("point not available");
@@ -270,7 +265,7 @@ class TransactionService {
               throw new Error("point not available");
             }
           }
-          console.log("price point: ", totalPrice);
+          // console.log("price point: ", totalPrice);
         }
       }
     }
@@ -350,7 +345,6 @@ class TransactionService {
           },
         }),
       ]);
-
     }
   }
 
