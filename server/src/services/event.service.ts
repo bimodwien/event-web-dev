@@ -181,6 +181,7 @@ class EventService {
     } = req.body as TEvent;
     const { file } = req;
 
+    // Cek jika event dengan judul yang sama sudah ada
     const existingEvent = await prisma.event.findMany({
       where: {
         title,
@@ -190,49 +191,52 @@ class EventService {
     if (existingEvent.length)
       throw new Error("Event with the same title already exists");
 
+    // Ubah gambar menjadi buffer
     const buffer = await sharp(req.file?.buffer).png().toBuffer();
     if (!file) throw new Error("no file image uploaded");
 
-    if (promotion && (!start_promo || !end_promo)) {
-      throw new Error("start & end promotion must be provided");
-    } else if (promotion && start_promo && end_promo) {
-      if (
-        promotion &&
-        start_promo &&
-        new Date(start_promo) > new Date(start_event)
-      ) {
-        throw new Error("promotion must start before the event start ");
-      } else if (
-        promotion &&
-        end_promo &&
-        new Date(end_promo) > new Date(start_event)
-      ) {
-        throw new Error("promotion must end before the event start");
-      }
-    }
-
-    const promoDiscounts: { [key in PromoList]: number } = {
-      five: 0.05,
-      ten: 0.1,
-      fifth_teen: 0.15,
-      twenty: 0.2,
-      twenty_five: 0.25,
-      forty: 0.4,
-      fifty: 0.5,
-    };
     let eventPrice;
-    let discountPrice;
+    let discountPrice = null;
+
     if (type === "free") {
       eventPrice = 0;
+      if (promotion || start_promo || end_promo) {
+        throw new Error(
+          "Promotion, start_promo, and end_promo must not be provided for free events"
+        );
+      }
     } else if (type === "paid") {
+      if (!ticket_price) {
+        throw new Error("Ticket price must be provided for paid events");
+      }
       eventPrice = Number(ticket_price);
-      if (promotion) {
+
+      if (promotion && (!start_promo || !end_promo)) {
+        throw new Error("start & end promotion must be provided");
+      } else if (promotion && start_promo && end_promo) {
+        if (new Date(start_promo) > new Date(start_event)) {
+          throw new Error("promotion must start before the event start");
+        } else if (new Date(end_promo) > new Date(start_event)) {
+          throw new Error("promotion must end before the event start");
+        }
+
+        const promoDiscounts: { [key in PromoList]: number } = {
+          five: 0.05,
+          ten: 0.1,
+          fifth_teen: 0.15,
+          twenty: 0.2,
+          twenty_five: 0.25,
+          forty: 0.4,
+          fifty: 0.5,
+        };
         const discount =
           promoDiscounts[promotion as keyof typeof promoDiscounts];
         discountPrice = ticket_price
           ? ticket_price - ticket_price * discount
           : null;
       }
+    } else {
+      throw new Error("Invalid event type");
     }
 
     const data: Prisma.EventCreateInput = {
@@ -251,9 +255,11 @@ class EventService {
       ticket_price: eventPrice,
       promo_price: discountPrice,
       max_buy,
-      promotion,
-      start_promo: start_promo ? new Date(start_promo) : null,
-      end_promo: end_promo ? new Date(end_promo) : null,
+      promotion: type === "paid" ? promotion : null,
+      start_promo:
+        type === "paid" ? (start_promo ? new Date(start_promo) : null) : null,
+      end_promo:
+        type === "paid" ? (end_promo ? new Date(end_promo) : null) : null,
       user: {
         connect: {
           id: req.user?.id,
@@ -279,7 +285,7 @@ class EventService {
 
     const currentEvent = await prisma.event.findUnique({
       where: { id: eventId, userId: req.user?.id },
-      select: { ticket_price: true, type: true },
+      select: { start_event: true, ticket_price: true, type: true },
     });
     if (!currentEvent) {
       throw new Error("Event not found");
@@ -287,44 +293,70 @@ class EventService {
 
     const data: Prisma.EventUpdateInput = { ...req.body };
 
-    const promoDiscounts: { [key in PromoList]: number } = {
-      five: 0.05,
-      ten: 0.1,
-      fifth_teen: 0.15,
-      twenty: 0.2,
-      twenty_five: 0.25,
-      forty: 0.4,
-      fifty: 0.5,
-    };
-    const promotion = req.body.promotion as PromoList;
-    const type = req.body.type || currentEvent.type;
-    const ticket_price =
-      req.body.ticket_price !== undefined
-        ? parseFloat(req.body.ticket_price)
-        : currentEvent.ticket_price;
-
-    let discountPrice;
-    console.log("Extracted fields:", { promotion, ticket_price, type });
-    if (type === "paid" && promotion) {
-      const discount = promoDiscounts[promotion as keyof typeof promoDiscounts];
-      discountPrice = ticket_price
-        ? ticket_price - ticket_price * discount
-        : null;
-      console.log("Discount calculation:", { discount, discountPrice });
-    }
-    if (promotion) {
-      data.promotion = promotion;
-      data.promo_price = discountPrice;
-      console.log("Data object before update:", data);
+    if (data.type && data.type !== currentEvent.type) {
+      throw new Error("Cannot change event type");
     }
 
-    const ticket_available = parseInt(req.body.ticket_available);
-    if (ticket_available) {
-      data.ticket_available = ticket_available;
-    }
+    if (currentEvent.type === "free") {
+      if (
+        data.ticket_price !== undefined ||
+        data.promotion !== undefined ||
+        data.start_promo !== undefined ||
+        data.end_promo !== undefined
+      ) {
+        throw new Error(
+          "Cannot update ticket_price, promotion, start_promo, or end_promo for free events"
+        );
+      }
+    } else if (currentEvent.type === "paid") {
+      const promoDiscounts: { [key in PromoList]: number } = {
+        five: 0.05,
+        ten: 0.1,
+        fifth_teen: 0.15,
+        twenty: 0.2,
+        twenty_five: 0.25,
+        forty: 0.4,
+        fifty: 0.5,
+      };
 
-    if (ticket_price) {
+      const promotion = req.body.promotion as PromoList;
+      const ticket_price =
+        req.body.ticket_price !== undefined
+          ? parseFloat(req.body.ticket_price)
+          : currentEvent.ticket_price ?? 0;
+      if (promotion) {
+        if (!req.body.start_promo || !req.body.end_promo) {
+          throw new Error("start & end promotion must be provided");
+        }
+
+        const start_promo = new Date(req.body.start_promo);
+        const end_promo = new Date(req.body.end_promo);
+        const start_event = new Date(currentEvent.start_event);
+
+        if (start_promo > start_event) {
+          throw new Error("promotion must start before the event start");
+        }
+
+        if (end_promo > start_event) {
+          throw new Error("promotion must end before the event start");
+        }
+
+        if (start_promo > end_promo) {
+          throw new Error("input the right date to start promotion");
+        }
+
+        const discount = promoDiscounts[promotion];
+        const discountPrice = ticket_price - ticket_price * discount;
+
+        data.promotion = promotion;
+        data.promo_price = discountPrice;
+      }
+
       data.ticket_price = ticket_price;
+    }
+
+    if (data.ticket_available !== undefined) {
+      data.ticket_available = Number(data.ticket_available);
     }
 
     if (file) {

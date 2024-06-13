@@ -166,6 +166,7 @@ enum Status {
 
 model Transaction {
   id           String    @id @default(cuid())
+  no_inv       String?
   event        Event     @relation(fields: [eventId], references: [id])
   eventId      String
   user         User      @relation(fields: [userId], references: [id])

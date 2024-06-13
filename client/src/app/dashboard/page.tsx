@@ -1,13 +1,11 @@
 import React from "react";
 
-const dashboard = () => {
+const detail = () => {
   return (
     <>
-      <main className="">
-        <h1>dashboard</h1>
-      </main>
+      <main className="">halooo </main>
     </>
   );
 };
 
-export default dashboard;
+export default detail;

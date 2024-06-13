@@ -2,16 +2,20 @@
 
 import { axiosInstance } from "@/lib/axios";
 import { TEvent } from "@/models/event.mode";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import { BiSolidCategoryAlt } from "react-icons/bi";
-import { avatar, imgSrc } from "@/app/_components/format";
+
+import { avatar, formatPrice, imgSrc } from "@/app/_components/format";
+
 import { Avatar } from "flowbite-react";
 
 export default function EventDetails() {
   dayjs.extend(relativeTime);
+
+  const router = useRouter();
 
   const params = useParams();
   const { eventId } = params;
@@ -19,22 +23,27 @@ export default function EventDetails() {
   const [eventData, setEventData] = useState<TEvent>();
 
   useEffect(() => {
-    const fetchEventData = async () => {
-      try {
-        const response = await axiosInstance().get(`/events/${eventId}`);
-        const { data } = response.data;
-        setEventData(data);
-      } catch (error) {
-        console.error("Error fetching event data:", error);
-      }
-    };
-    fetchEventData();
+    if (eventId) {
+      const fetchEventData = async () => {
+        try {
+          const response = await axiosInstance().get(`/events/${eventId}`);
+          const { data } = response.data;
+          setEventData(data);
+        } catch (error) {
+          console.error("Error fetching event data:", error);
+        }
+      };
+      fetchEventData();
+    }
   }, [eventId]);
 
-  const formatPrice = (price: number) => {
-    return price.toLocaleString("en-ID");
+  const handleBuyTicket = () => {
+    if (eventData?.ticket_available && eventId) {
+      router.push(`/check-out/${eventId}`);
+    } else {
+      alert("Sorry, tickets are sold out.");
+    }
   };
-
   return (
     <div className="p-16">
       {eventData && (
@@ -86,6 +95,8 @@ export default function EventDetails() {
                         : undefined
                     }
                     rounded
+                    size="md"
+                    // className="rounded-full w-12 h-12 object-cover"
                   />
                   <div className="flex flex-col">
                     <p className="text-gray-500 text-sm">Hosted by</p>
@@ -109,21 +120,34 @@ export default function EventDetails() {
               </div>
             </div>
             <div className="flex flex-col justify-between sticky top-28 rounded-lg shadow-md p-5 w-96 h-60 bg-white">
-              <p className="font-semibold">Ticket: {eventData.title}</p>
+              <p className="font-semibold text-lg">Ticket: {eventData.title}</p>
               <div className="flex justify-between">
                 <p>
-                  {eventData.ticket_available} <span>left</span>
+                  {eventData.ticket_available === 0
+                    ? "Sold Out"
+                    : `Available ${eventData.ticket_available}`}
                 </p>
-                <p className="font-semibold">
-                  {" "}
-                  Rp {formatPrice(eventData.ticket_price)}
-                </p>
+                {eventData.type === "free" ? (
+                  <p className="font-semibold text-xl">Free</p>
+                ) : (
+                  <>
+                    {eventData.promotion ? (
+                      <p className="font-semibold text-xl">
+                        Rp {formatPrice(eventData.promo_price)}
+                      </p>
+                    ) : (
+                      <p className="font-semibold text-xl">
+                        Rp {formatPrice(eventData.ticket_price)}
+                      </p>
+                    )}
+                  </>
+                )}
               </div>
-              <div className="flex justify-between">
-                <p>Total () ticket</p>
-                <p>Rp</p>
-              </div>
-              <button className="p-2 rounded-lg bg-blue-700 text-white">
+              <button
+                className="p-2 rounded-lg bg-blue-700 text-white hover:bg-blue-600"
+                disabled={eventData.ticket_available === 0}
+                onClick={handleBuyTicket}
+              >
                 Buy Ticket
               </button>
             </div>

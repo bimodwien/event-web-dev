@@ -84,17 +84,17 @@ const EventEditForm = () => {
           "ticket_available",
           values.ticket_available.toString()
         );
-        editEvent.append(
-          "ticket_price",
-          values.type === "free" ? "0" : values.ticket_price.toString()
-        );
         editEvent.append("max_buy", values.max_buy);
 
-        if (values.promotion) {
-          editEvent.append("promotion", values.promotion);
-          editEvent.append("start_promo", values.start_promo);
-          editEvent.append("end_promo", values.end_promo);
+        if (values.type !== "free") {
+          editEvent.append("ticket_price", values.ticket_price.toString());
+          if (values.promotion) {
+            editEvent.append("promotion", values.promotion);
+            editEvent.append("start_promo", values.start_promo);
+            editEvent.append("end_promo", values.end_promo);
+          }
         }
+
         if (values.image !== `${imgSrc}${eventId}`) {
           editEvent.append("image", values.image);
         }
@@ -116,6 +116,10 @@ const EventEditForm = () => {
       }
     },
   });
+
+  useEffect(() => {
+    setTypeFree(formik.values.type === "free");
+  }, [formik.values.type]);
 
   useEffect(() => {
     const fetchEvent = async () => {
