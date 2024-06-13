@@ -1,4 +1,5 @@
 "use strict";
+
 import { Router } from "express";
 import {
   verifyCustomer,
@@ -21,6 +22,27 @@ class TransactionRouter {
     this.router.get("/", transactionController.getAll);
 
     this.router.get(
+      "/:transactionId",
+      validateToken,
+      verifyCustomer,
+      transactionController.getDetail
+    );
+
+    this.router.get(
+      "/point-voucher",
+      validateToken,
+      verifyCustomer,
+      transactionController.getPointVoucher
+    );
+
+    this.router.post(
+      "/:eventId",
+      validateToken,
+      verifyCustomer,
+      transactionController.createTransaction
+    );
+
+    this.router.get(
       "/customer",
       validateToken,
       verifyCustomer,
@@ -33,6 +55,7 @@ class TransactionRouter {
     //   verifyCustomer,
     //   transactionController.createTransaction
     // );
+
 
     this.router.patch(
       "/:transactionId",

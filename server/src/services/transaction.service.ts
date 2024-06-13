@@ -2,6 +2,8 @@ import { Request } from "express";
 import prisma from "../lib/prisma";
 import { MaxBuy, Status } from "@prisma/client";
 import sharp from "sharp";
+import { TTransaction } from "../models/transaction.model";
+
 class TransactionService {
   async getAll(req: Request) {
     const data = await prisma.transaction.findMany({
@@ -57,17 +59,72 @@ class TransactionService {
   }
 
   async getDetail(req: Request) {
-    const { id } = req.params;
+    const { transactionId } = req.params;
     const data = await prisma.transaction.findUnique({
-      where: { id: id },
+      where: { id: transactionId, userId: req.user.id },
+      select: {
+        id: true,
+        no_inv: true,
+        total_price: true,
+        total_ticket: true,
+        status: true,
+        createdAt: true,
+        event: {
+          select: {
+            id: true,
+            title: true,
+            ticket_price: true,
+            start_event: true,
+            end_event: true,
+            user: {
+              select: {
+                id: true,
+                name: true,
+              },
+            },
+          },
+        },
+      },
     });
 
     return data;
   }
 
+  async getPointVoucher(req: Request) {
+    const pointData = await prisma.user.findUnique({
+      where: { id: req.user.id },
+      select: { id: true, point: true, pointExpiredDate: true },
+    });
+
+    if (!pointData) {
+      throw new Error("Voucher not found");
+    }
+
+    const voucherData = await prisma.voucher.findUnique({
+      where: { userId: req.user.id },
+    });
+
+    if (!voucherData) {
+      throw new Error("Voucher not found");
+    }
+
+    return { point: pointData, voucher: voucherData };
+  }
+
+  private generateInvoiceNumber(): string {
+    const timestamp = new Date().getTime().toString();
+    const randomDigits = Math.floor(Math.random() * 10000)
+      .toString()
+      .padStart(4, "0");
+    return `${timestamp}${randomDigits}`;
+  }
+
   async create(req: Request) {
     const { eventId } = req.params;
-    const { total_ticket, point, voucher } = req.body;
+
+    const { total_ticket, point, voucher } = req.body as TTransaction;
+    let status: Status = "pending";
+    const no_inv = this.generateInvoiceNumber();
 
     const parsedTotalTicket = Number(total_ticket);
 
@@ -95,13 +152,15 @@ class TransactionService {
     const limit = maxBuy[event.max_buy as MaxBuy];
 
     // harus input jumlah tiket yang dibeli
-    console.log(typeof total_ticket);
+
+    // console.log(typeof total_ticket);
 
     // input jumlah tiket sesuai stock
-    if (total_ticket > event.ticket_available) {
+    if (parsedTotalTicket > event.ticket_available) {
       throw new Error("jumlah tiket melebihi stock tersedia");
     }
-    if (total_ticket > limit) {
+    if (parsedTotalTicket > limit) {
+
       // jumlah tiket tidak lebih dari max buy
       throw new Error("Jumlah tiket melebihi batas pembelian");
     }
@@ -124,7 +183,7 @@ class TransactionService {
 
     console.log("check price: ", checkPrice);
 
-    totalPrice = total_ticket * checkPrice;
+    totalPrice = parsedTotalTicket * checkPrice;
 
     console.log("total price: ", totalPrice);
 
@@ -148,7 +207,7 @@ class TransactionService {
         });
 
         if (!checkVoucher || checkVoucher.ammount === 0) {
-          throw new Error("You have no voucher");
+          throw new Error("You have no voucher available");
         }
 
         const voucherPrice = totalPrice * 0.1;
@@ -163,37 +222,39 @@ class TransactionService {
           },
         });
       } else if (point) {
+        console.log(req.user.point);
+        console.log(req.user.pointExpiredDate);
+
         if (!req.user?.point || req.user?.point === 0) {
-          throw new Error("point tidak tersedia");
+          throw new Error("point not available");
         }
         if (req.user.point) {
           if (totalPrice <= req.user.point) {
             const newPoint = req.user.point - totalPrice;
-            // totalPrice = req.user.point - total_ticket * checkPrice;
             totalPrice = 0;
             await prisma.user.update({
               where: { id: req.user.id },
               data: { point: newPoint },
             });
           } else {
-            totalPrice = total_ticket * checkPrice - req.user.point;
-            await prisma.user.update({
-              where: { id: req.user.id },
-              data: { point: 0, pointExpiredDate: currentDate },
-            });
+            if (totalPrice !== 0) {
+              totalPrice = parsedTotalTicket * checkPrice - req.user.point;
+              await prisma.user.update({
+                where: { id: req.user.id },
+                data: { point: 0, pointExpiredDate: currentDate },
+              });
+            } else {
+              throw new Error("point not available");
+            }
           }
           console.log("price point: ", totalPrice);
         }
       }
     }
 
-    await prisma.event.update({
-      where: { id: eventId },
-      data: {
-        ticket_available: event.ticket_available - total_ticket,
-      },
-    });
-
+    if (totalPrice === 0) {
+      status = "paid";
+    }
     const transaction = await prisma.$transaction([
       prisma.event.update({
         where: { id: eventId },
@@ -205,9 +266,10 @@ class TransactionService {
         data: {
           eventId: eventId,
           userId: req.user.id,
-          total_ticket: Number(total_ticket),
+          total_ticket: parsedTotalTicket,
           total_price: totalPrice,
-          status: Status.pending,
+          status: status,
+          no_inv: no_inv,
         },
       }),
     ]);
@@ -219,19 +281,20 @@ class TransactionService {
     const { transactionId } = req.params;
     const { file } = req;
 
-    const currentTransaction = await prisma.transaction.findUnique({
+    const transaction = await prisma.transaction.findUnique({
       where: { id: transactionId, userId: req.user.id },
     });
-    if (!currentTransaction) {
+    if (!transaction) {
       throw new Error("Transaction not found");
     }
 
-    let status = currentTransaction.status;
-    let paid_at = currentTransaction.paid_at;
+    let status = transaction.status;
+    let paid_at = transaction.paid_at;
 
     if (file) {
-      // klo up foto,  status jd "paid" & paid_at = waktu saat ini
-      status = Status.paid;
+      // Jika mengunggah foto, status menjadi "paid" dan paid_at = waktu saat ini
+      status = "paid";
+
       paid_at = new Date();
       const buffer = await sharp(file.buffer).png().toBuffer();
 
@@ -240,13 +303,31 @@ class TransactionService {
         data: { paid_proof: buffer, status, paid_at },
       });
     } else {
-      status = Status.cancelled;
+      // Jika tidak mengunggah foto, status menjadi "cancelled"
+      status = "cancelled";
       paid_at = null;
 
-      return await prisma.transaction.update({
-        where: { id: transactionId, userId: req.user.id },
-        data: { status, paid_at },
+      const event = await prisma.event.findUnique({
+        where: { id: transaction.eventId },
       });
+
+      if (!event) {
+        throw new Error("Event not found");
+      }
+
+      return await prisma.$transaction([
+        prisma.transaction.update({
+          where: { id: transactionId, userId: req.user.id },
+          data: { status, paid_at },
+        }),
+        prisma.event.update({
+          where: { id: transaction.eventId },
+          data: {
+            ticket_available: event.ticket_available + transaction.total_ticket,
+          },
+        }),
+      ]);
+
     }
   }
 

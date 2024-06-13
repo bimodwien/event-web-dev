@@ -14,7 +14,7 @@ export type TUser = {
   referralCode?: string;
   referenceCode?: string;
   point?: number;
-  pointExpiry?: Date;
+  pointExpiredDate?: Date;
 };
 
 export type TDecode = {
