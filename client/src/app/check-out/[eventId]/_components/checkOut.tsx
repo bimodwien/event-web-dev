@@ -67,7 +67,7 @@ const Transaction = () => {
           `/transactions/point-voucher`
         );
         const { data } = response.data;
-        console.log(data);
+        // console.log(data);
         setPointVoucher(data);
       } catch (error) {
         console.error("Error fetching event data:", error);
@@ -151,11 +151,12 @@ const Transaction = () => {
         voucher: voucher,
         point: point,
       });
-      const transactionId = response.data.id;
 
+      const transactionId = response.data.data[1].id;
+      console.log("ID from recent order:", transactionId);
       console.log("Payment successful:", response.data);
 
-      router.push(`/invoice/${transactionId}`);
+      router.push(`/payment/${transactionId}`);
     } catch (error) {
       console.error("Error making payment:", error);
     }

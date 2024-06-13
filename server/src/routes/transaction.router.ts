@@ -19,6 +19,13 @@ class TransactionRouter {
   initializedRoutes() {
     this.router.get("/", transactionController.getAll);
     this.router.get(
+      "/:transactionId",
+      validateToken,
+      verifyCustomer,
+      transactionController.getDetail
+    );
+
+    this.router.get(
       "/point-voucher",
       validateToken,
       verifyCustomer,

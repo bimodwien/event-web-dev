@@ -26,17 +26,6 @@ class TransactionController {
     }
   }
 
-  //   async getByTitle(req: Request, res: Response, next: NextFunction) {
-  //     try {
-  //       const data = await transactionService.gettransactionByTitle(req);
-  //       return res.send({
-  //         message: "fetch all transaction by title",
-  //         data,
-  //       });
-  //     } catch (error) {
-  //       next(error);
-  //     }
-  //   }
   async getPointVoucher(req: Request, res: Response, next: NextFunction) {
     try {
       const data = await transactionService.getPointVoucher(req);
@@ -51,11 +40,10 @@ class TransactionController {
 
   async createTransaction(req: Request, res: Response, next: NextFunction) {
     try {
-      console.log("masuk kedalam controller create transaction");
-
-      await transactionService.create(req);
-      res.status(201).send({
-        message: "new transaction created",
+      const transactionData = await transactionService.create(req);
+      return res.send({
+        message: "successfully create new transaction",
+        data: transactionData, // Memastikan data yang benar digunakan di sini
       });
     } catch (error) {
       next(error);

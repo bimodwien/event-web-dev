@@ -43,9 +43,32 @@ class TransactionService {
   }
 
   async getDetail(req: Request) {
-    const { id } = req.params;
+    const { transactionId } = req.params;
     const data = await prisma.transaction.findUnique({
-      where: { id: id },
+      where: { id: transactionId, userId: req.user.id },
+      select: {
+        id: true,
+        no_inv: true,
+        total_price: true,
+        total_ticket: true,
+        status: true,
+        createdAt: true,
+        event: {
+          select: {
+            id: true,
+            title: true,
+            ticket_price: true,
+            start_event: true,
+            end_event: true,
+            user: {
+              select: {
+                id: true,
+                name: true,
+              },
+            },
+          },
+        },
+      },
     });
 
     return data;
@@ -112,7 +135,7 @@ class TransactionService {
     const limit = maxBuy[event.max_buy as MaxBuy];
 
     // harus input jumlah tiket yang dibeli
-    console.log(typeof total_ticket);
+    // console.log(typeof total_ticket);
 
     // input jumlah tiket sesuai stock
     if (parsedTotalTicket > event.ticket_available) {
@@ -240,19 +263,19 @@ class TransactionService {
     const { transactionId } = req.params;
     const { file } = req;
 
-    const currentTransaction = await prisma.transaction.findUnique({
+    const transaction = await prisma.transaction.findUnique({
       where: { id: transactionId, userId: req.user.id },
     });
-    if (!currentTransaction) {
+    if (!transaction) {
       throw new Error("Transaction not found");
     }
 
-    let status = currentTransaction.status;
-    let paid_at = currentTransaction.paid_at;
+    let status = transaction.status;
+    let paid_at = transaction.paid_at;
 
     if (file) {
-      // klo up foto,  status jd "paid" & paid_at = waktu saat ini
-      status = Status.paid;
+      // Jika mengunggah foto, status menjadi "paid" dan paid_at = waktu saat ini
+      status = "paid";
       paid_at = new Date();
       const buffer = await sharp(file.buffer).png().toBuffer();
 
@@ -261,13 +284,30 @@ class TransactionService {
         data: { paid_proof: buffer, status, paid_at },
       });
     } else {
-      status = Status.cancelled;
+      // Jika tidak mengunggah foto, status menjadi "cancelled"
+      status = "cancelled";
       paid_at = null;
 
-      return await prisma.transaction.update({
-        where: { id: transactionId, userId: req.user.id },
-        data: { status, paid_at },
+      const event = await prisma.event.findUnique({
+        where: { id: transaction.eventId },
       });
+
+      if (!event) {
+        throw new Error("Event not found");
+      }
+
+      return await prisma.$transaction([
+        prisma.transaction.update({
+          where: { id: transactionId, userId: req.user.id },
+          data: { status, paid_at },
+        }),
+        prisma.event.update({
+          where: { id: transaction.eventId },
+          data: {
+            ticket_available: event.ticket_available + transaction.total_ticket,
+          },
+        }),
+      ]);
     }
   }
 
