@@ -29,6 +29,29 @@ class TransactionService {
         },
       },
       orderBy: { createdAt: "desc" },
+      select: {
+        id: true,
+        no_inv: true,
+        total_price: true,
+        total_ticket: true,
+        status: true,
+        createdAt: true,
+        event: {
+          select: {
+            id: true,
+            title: true,
+            ticket_price: true,
+            start_event: true,
+            end_event: true,
+            user: {
+              select: {
+                id: true,
+                name: true,
+              },
+            },
+          },
+        },
+      },
     });
 
     console.log("ini data", data);

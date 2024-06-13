@@ -22,6 +22,12 @@ class TransactionRouter {
     this.router.get("/", transactionController.getAll);
 
     this.router.get(
+      "/yours",
+      validateToken,
+      verifyCustomer,
+      transactionController.getPaymentByBuyer
+    );
+    this.router.get(
       "/:transactionId",
       validateToken,
       verifyCustomer,

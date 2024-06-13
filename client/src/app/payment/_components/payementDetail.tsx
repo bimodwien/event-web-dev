@@ -105,6 +105,9 @@ export default function PaymentDetail() {
                     )} - {dayjs(transaction.event.end_event).format("HH:mm")}{" "}
                     WIB
                   </p>
+                  <p className="text-gray-600 text-sm">
+                    Hosted by: {transaction.event.user.name}
+                  </p>
                 </div>
               </div>
               <div className="text-right">
@@ -161,7 +164,7 @@ export default function PaymentDetail() {
           )}
           {transaction.status === "paid" && (
             <div className="flex flex-col gap-2 items-center">
-              <p className="text-center text-blue-500">
+              <p className="text-center text-green-500 text-lg font-semibold">
                 congratulations, your transaction was successful
               </p>
               <p className="text-center">
@@ -170,10 +173,10 @@ export default function PaymentDetail() {
                 event!
               </p>
               <Link
-                href={"/My Ticket"}
-                className="px-2 py-1 bg-blue-600 text-white rounded hover:bg-blue-500 text-center"
+                href={"/my-ticket"}
+                className="px-2 py-1 bg-blue-600 text-white rounded hover:bg-blue-500 text-center text-lg"
               >
-                See Your Ticket
+                All My Tickets
               </Link>
             </div>
           )}

@@ -29,6 +29,13 @@ class TransactionController {
     }
   }
 
+
+  async getPaymentByBuyer(req: Request, res: Response, next: NextFunction) {
+    try {
+      const data = await transactionService.getByCustomer(req);
+      return res.send({
+        message: "fetch all buyer payment",
+
   async getDetailByCustomer(req: Request, res: Response, next: NextFunction) {
     try {
       const data = await transactionService.getByCustomer(req);
@@ -77,18 +84,6 @@ class TransactionController {
   //     }
   //   }
 
-  async createTransaction(req: Request, res: Response, next: NextFunction) {
-    try {
-      console.log("masuk kedalam controller create transaction");
-
-      await transactionService.create(req);
-      res.status(201).send({
-        message: "new transaction created",
-      });
-    } catch (error) {
-      next(error);
-    }
-  }
 
   //   async render(req: Request, res: Response, next: NextFunction) {
   //     try {
@@ -111,17 +106,6 @@ class TransactionController {
     }
   }
 
-  async delete(req: Request, res: Response, next: NextFunction) {
-    try {
-      await transactionService.delete(req);
-      return res.send({
-        message: "transaction has been deleted",
-
-      });
-    } catch (error) {
-      next(error);
-    }
-  }
   
   async getDetail(req: Request, res: Response, next: NextFunction) {
     try {
