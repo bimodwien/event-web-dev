@@ -81,7 +81,7 @@ const EventList = () => {
       </div>
       <div className="border-l border-gray-300 py-5 px-10 w-full flex flex-col justify-between">
         <SearchInput value={search} onChange={setSearch} />
-        <div className="grid max-w-screen-2xl w-full md:grid-cols-3 lg:grid-cols-4  grid-cols-2	gap-5 py-5">
+        <div className="grid max-w-screen-2xl w-full md:grid-cols-3 lg:grid-cols-4  grid-cols-2	gap-5 py-5 px-3">
           {event?.map((event) => (
             <Link
               href={`events/${event.id}`}

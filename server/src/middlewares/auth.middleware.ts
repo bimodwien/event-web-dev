@@ -16,6 +16,8 @@ export const validateToken = (
     if (decode.type != "access-token") throw new Error("invalid token");
     req.user = decode.user;
 
+    console.log(req.user, decode.user);
+
     next();
   } catch (error) {
     next(error);

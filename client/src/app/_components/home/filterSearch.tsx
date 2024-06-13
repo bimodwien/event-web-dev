@@ -7,7 +7,7 @@ interface SearchInputProps {
 
 const SearchInput: React.FC<SearchInputProps> = ({ value, onChange }) => {
   return (
-    <div className="flex px-3 items-center gap-3 border-gray-300 border rounded-full w-80  p-2 ">
+    <div className="flex px-3 items-center gap-3 border-gray-300 border rounded-full full  p-2 ">
       <BiSearch className=" w-4 h-4" />
       <input
         type="search"

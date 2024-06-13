@@ -1,3 +1,5 @@
+"use strict";
+
 import { Router } from "express";
 import {
   verifyCustomer,
@@ -18,6 +20,7 @@ class TransactionRouter {
   }
   initializedRoutes() {
     this.router.get("/", transactionController.getAll);
+
     this.router.get(
       "/:transactionId",
       validateToken,
@@ -38,6 +41,21 @@ class TransactionRouter {
       verifyCustomer,
       transactionController.createTransaction
     );
+
+    this.router.get(
+      "/customer",
+      validateToken,
+      verifyCustomer,
+      transactionController.getDetailByCustomer
+    );
+
+    // this.router.post(
+    //   "/:eventId",
+    //   validateToken,
+    //   verifyCustomer,
+    //   transactionController.createTransaction
+    // );
+
 
     this.router.patch(
       "/:transactionId",

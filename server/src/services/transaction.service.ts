@@ -3,6 +3,7 @@ import prisma from "../lib/prisma";
 import { MaxBuy, Status } from "@prisma/client";
 import sharp from "sharp";
 import { TTransaction } from "../models/transaction.model";
+
 class TransactionService {
   async getAll(req: Request) {
     const data = await prisma.transaction.findMany({
@@ -13,12 +14,18 @@ class TransactionService {
   }
 
   async getByCustomer(req: Request) {
-    const data = await prisma.transaction.findMany({
-      where: { userId: req.user.id },
+    const userId = req.user?.id;
+    console.log(req.user);
+
+    const data = await prisma.transaction.findFirst({
+      where: { userId: userId },
       orderBy: { createdAt: "desc" },
     });
 
+    console.log("ini data", data);
+
     return data;
+    // return {};
   }
 
   async getByEvent(req: Request) {
@@ -105,6 +112,7 @@ class TransactionService {
 
   async create(req: Request) {
     const { eventId } = req.params;
+
     const { total_ticket, point, voucher } = req.body as TTransaction;
     let status: Status = "pending";
     const no_inv = this.generateInvoiceNumber();
@@ -135,6 +143,7 @@ class TransactionService {
     const limit = maxBuy[event.max_buy as MaxBuy];
 
     // harus input jumlah tiket yang dibeli
+
     // console.log(typeof total_ticket);
 
     // input jumlah tiket sesuai stock
@@ -142,6 +151,7 @@ class TransactionService {
       throw new Error("jumlah tiket melebihi stock tersedia");
     }
     if (parsedTotalTicket > limit) {
+
       // jumlah tiket tidak lebih dari max buy
       throw new Error("Jumlah tiket melebihi batas pembelian");
     }
@@ -236,7 +246,6 @@ class TransactionService {
     if (totalPrice === 0) {
       status = "paid";
     }
-
     const transaction = await prisma.$transaction([
       prisma.event.update({
         where: { id: eventId },
@@ -276,6 +285,7 @@ class TransactionService {
     if (file) {
       // Jika mengunggah foto, status menjadi "paid" dan paid_at = waktu saat ini
       status = "paid";
+
       paid_at = new Date();
       const buffer = await sharp(file.buffer).png().toBuffer();
 
@@ -308,6 +318,7 @@ class TransactionService {
           },
         }),
       ]);
+
     }
   }
 

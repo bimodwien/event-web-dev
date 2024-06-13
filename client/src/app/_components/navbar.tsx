@@ -85,12 +85,21 @@ const Navbar = () => {
               <ul className="py-2 w-52">
                 <li>
                   <Link
+                    href={"/my-ticket"}
+                    className="block px-4 py-2 text-white hover:bg-gray-600 text-sm hover:cursor-pointer"
+                  >
+                    My Ticket
+                  </Link>
+                </li>
+                <li>
+                  <Link
                     href={"/edit-profile"}
                     className="block px-4 py-2 text-sm  hover:bg-gray-600 text-white"
                   >
                     Edit Profile
                   </Link>
                 </li>
+
                 <li>
                   <button className="block mx-3 mt-4 py-1 px-2 text-sm rounded bg-red-700 hover:bg-red-600 text-white">
                     <Logout title="Logout" />
