@@ -17,6 +17,15 @@ class TransactionService {
 
     const data = await prisma.transaction.findFirst({
       where: { userId: userId },
+      include: {
+        event: {
+          select: {
+            id: true,
+            image: true,
+            title: true,
+          },
+        },
+      },
       orderBy: { createdAt: "desc" },
     });
 
