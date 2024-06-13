@@ -5,10 +5,11 @@ import { TEvent } from "@/models/event.mode";
 import { useParams, useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 import dayjs from "dayjs";
-
 import relativeTime from "dayjs/plugin/relativeTime";
 import { BiSolidCategoryAlt } from "react-icons/bi";
+
 import { avatar, formatPrice, imgSrc } from "@/app/_components/format";
+
 import { Avatar } from "flowbite-react";
 
 export default function EventDetails() {

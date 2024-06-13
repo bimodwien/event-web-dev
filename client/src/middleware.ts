@@ -92,6 +92,8 @@ export async function middleware(request: NextRequest) {
   // akses ke edit profile namun belum login
   else if (pathname == "/edit-profile" && !isLogin)
     return NextResponse.redirect(new URL("/login", request.url));
+  else if (pathname == "/my-ticket" && !isLogin)
+    return NextResponse.redirect(new URL("/login", request.url));
 
   return response;
 }
@@ -104,5 +106,6 @@ export const config = {
     "/verify-user",
     "/dashboard/:path*",
     "/edit-profile",
+    "/my-ticket",
   ],
 };
