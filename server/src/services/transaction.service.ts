@@ -477,8 +477,7 @@ class TransactionService {
       }),
     ]);
 
-    // Set timeout for payment proof upload
-    const timeoutDuration = 1 * 60 * 1000; // 15 minutes in milliseconds
+    const timeoutDuration = 15 * 60 * 1000;
     const transactionId = transaction[1].id;
 
     setTimeout(async () => {

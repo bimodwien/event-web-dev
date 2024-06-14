@@ -15,7 +15,7 @@ export default function AllPayment() {
     try {
       const response = await axiosInstance().get("/transactions/yours");
       const { data } = response.data;
-      const tempData = setPaymentData(data);
+      setPaymentData(data);
       console.log(response.data, "ini response");
       // console.log(data);
     } catch (error) {

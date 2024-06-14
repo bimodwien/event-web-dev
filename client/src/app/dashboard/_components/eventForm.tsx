@@ -203,7 +203,7 @@ const EventForm = () => {
                       required
                     >
                       <option value="">Select a city</option>
-                      <option value="Jakarta">JAKARAT</option>
+                      <option value="Jakarta">Jakarta</option>
                       <option value="Bandung">Bandung</option>
                       <option value="Surabaya">Surabaya</option>
                     </select>

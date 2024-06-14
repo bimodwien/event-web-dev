@@ -40,62 +40,58 @@ class StatisticService {
         break;
     }
 
-    try {
-      //  total pendapatan
-      const totalRevenue = await prisma.transaction.aggregate({
-        where: {
-          event: { userId: userId },
-          status: "paid",
-          createdAt: dateRange,
-        },
-        _sum: { total_price: true },
-      });
+    //  total pendapatan
+    const totalRevenue = await prisma.transaction.aggregate({
+      where: {
+        event: { userId: userId },
+        status: "paid",
+        createdAt: dateRange,
+      },
+      _sum: { total_price: true },
+    });
 
-      const totalRevenueAmount = totalRevenue._sum.total_price || 0;
+    const totalRevenueAmount = totalRevenue._sum.total_price || 0;
 
-      //  total tiket terjual
-      const totalSoldTickets = await prisma.transaction.aggregate({
-        where: {
-          event: { userId: userId },
-          status: "paid",
-          createdAt: dateRange,
-        },
-        _sum: { total_ticket: true },
-      });
+    //  total tiket terjual
+    const totalSoldTickets = await prisma.transaction.aggregate({
+      where: {
+        event: { userId: userId },
+        status: "paid",
+        createdAt: dateRange,
+      },
+      _sum: { total_ticket: true },
+    });
 
-      const totalSoldTicketsCount = totalSoldTickets._sum.total_ticket || 0;
+    const totalSoldTicketsCount = totalSoldTickets._sum.total_ticket || 0;
 
-      // total event yang dimiliki
-      const totalEvents = await prisma.event.count({
-        where: {
-          userId: userId,
-          createdAt: dateRange,
-        },
-      });
+    // total event yang dimiliki
+    const totalEvents = await prisma.event.count({
+      where: {
+        userId: userId,
+        createdAt: dateRange,
+      },
+    });
 
-      // total sisa tiket (tidak terjual)
-      const totalAvailableTickets = await prisma.event.aggregate({
-        where: {
-          userId: userId,
-          createdAt: dateRange,
-        },
-        _sum: { ticket_available: true },
-      });
+    // total sisa tiket (tidak terjual)
+    const totalAvailableTickets = await prisma.event.aggregate({
+      where: {
+        userId: userId,
+        createdAt: dateRange,
+      },
+      _sum: { ticket_available: true },
+    });
 
-      const totalAvailableTicketsCount =
-        totalAvailableTickets._sum.ticket_available || 0;
-      const totalUnsoldTicketsCount =
-        totalAvailableTicketsCount - totalSoldTicketsCount;
+    const totalAvailableTicketsCount =
+      totalAvailableTickets._sum.ticket_available || 0;
+    const totalUnsoldTicketsCount =
+      totalAvailableTicketsCount - totalSoldTicketsCount;
 
-      return {
-        totalRevenueAmount,
-        totalSoldTicketsCount,
-        totalEvents,
-        totalUnsoldTicketsCount,
-      };
-    } catch (error) {
-      console.error("Error:", error);
-    }
+    return {
+      totalRevenueAmount,
+      totalSoldTicketsCount,
+      totalEvents,
+      totalUnsoldTicketsCount,
+    };
   }
 }
 

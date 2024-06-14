@@ -22,6 +22,35 @@ class ReviewService {
     return data;
   }
 
+  static async getReviewByUser(req: Request) {
+    const { eventId } = req.params;
+
+    const data = await prisma.review.findMany({
+      where: {
+        eventId: eventId,
+      },
+      select: {
+        id: true,
+        review_text: true,
+        rating: true,
+        user: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
+        event: {
+          select: {
+            id: true,
+            title: true,
+          },
+        },
+      },
+    });
+
+    return data;
+  }
+
   static async getReviewByEvent(req: Request) {
     const { eventId } = req.params;
 

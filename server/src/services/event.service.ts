@@ -155,6 +155,8 @@ class EventService {
         end_event: true,
         ticket_price: true,
         promo_price: true,
+        start_promo: true,
+        end_promo: true,
         type: true,
         promotion: true,
         user: { select: { username: true } },
@@ -292,7 +294,12 @@ class EventService {
 
     const currentEvent = await prisma.event.findUnique({
       where: { id: eventId, userId: req.user?.id },
-      select: { start_event: true, ticket_price: true, type: true },
+      select: {
+        start_event: true,
+        end_event: true,
+        ticket_price: true,
+        type: true,
+      },
     });
     if (!currentEvent) {
       throw new Error("Event not found");
