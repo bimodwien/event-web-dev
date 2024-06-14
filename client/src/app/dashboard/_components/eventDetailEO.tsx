@@ -38,7 +38,7 @@ const EventDetailEO = ({ eventData }: Props) => {
       console.log(response, "ini response");
       // setReviews(response);
       setViews(response);
-      console.log(views, "ini views");
+      // console.log(views, "ini views");
     } catch (error) {
       console.log(error);
     }
@@ -48,9 +48,22 @@ const EventDetailEO = ({ eventData }: Props) => {
     fetchReview();
   }, []);
 
-  // useEffect(() => {
-  //   console.log(views, "ini console log di useefect");
-  // }, [views]);
+  useEffect(() => {
+    console.log(views, "ini console log di useefect");
+  }, [views]);
+
+  function renderStars(rating: number) {
+    const stars = [];
+    for (let i = 0; i < 5; i++) {
+      if (i < rating) {
+        stars.push(<FaStar key={i} />);
+      } else {
+        stars.push(<FaRegStar key={i} />);
+      }
+    }
+    return stars;
+  }
+
   return (
     <>
       <div className="p-5">
@@ -88,24 +101,20 @@ const EventDetailEO = ({ eventData }: Props) => {
           </div>
         )}
       </div>
-      {/* {views.map((review) => {
-        return <div key={review.id}>{review.text}</div>;
-      })} */}
-
-      <div className="px-5">
-        <h1 className="py-3 font-bold text-4xl">Reviews</h1>
-        <div className="flex flex-col justify-between gap-2 rounded-lg shadow-md p-5 w-full bg-white">
-          <div className="font-semibold text-xl">Liradiy</div>
-          <div className="flex gap-3 text-yellow-200 text-2xl">
-            <FaStar />
-            <FaStar />
-            <FaStar />
-            <FaStar />
-            <FaRegStar />
+      {views.map((review) => {
+        return (
+          <div
+            key={review.id}
+            className="flex flex-col justify-between gap-2 rounded-lg shadow-md p-5 w-full bg-white"
+          >
+            <div className="font-semibold text-xl">{review.user.name}</div>
+            <div className="flex gap-3 text-yellow-200 text-2xl">
+              {renderStars(review.rating)}
+            </div>
+            <div>{review.review_text}</div>
           </div>
-          <div>Baguuuusss</div>
-        </div>
-      </div>
+        );
+      })}
     </>
   );
 };
