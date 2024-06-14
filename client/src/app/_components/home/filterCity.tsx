@@ -5,7 +5,7 @@ interface CitySelectProps {
 
 const CitySelect: React.FC<CitySelectProps> = ({ value, onChange }) => {
   return (
-    <div className="flex flex-col gap-1">
+    <div className="flex gap-3 md:flex-col md:gap-1  items-center md:items-start">
       <label htmlFor="city" className="font-semibold">
         City
       </label>

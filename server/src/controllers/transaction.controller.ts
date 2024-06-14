@@ -53,6 +53,16 @@ class TransactionController {
     }
   }
 
+  async getByEventId(req: Request, res: Response, next: NextFunction) {
+    try {
+      const data = await transactionService.getByEvent(req);
+      return res.status(200).send({
+        message: "get transaction by event",
+        data,
+      });
+    } catch (error) {}
+  }
+
   async getPointVoucher(req: Request, res: Response, next: NextFunction) {
     try {
       const data = await transactionService.getPointVoucher(req);
@@ -94,6 +104,16 @@ class TransactionController {
       return res.send({
         message: "transaction has been deleted",
       });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async renderProof(req: Request, res: Response, next: NextFunction) {
+    try {
+      const blob = await transactionService.renderProof(req);
+      res.set("Content-type", "image/png");
+      res.send(blob);
     } catch (error) {
       next(error);
     }

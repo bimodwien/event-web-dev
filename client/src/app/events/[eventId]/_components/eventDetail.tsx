@@ -11,6 +11,7 @@ import { BiSolidCategoryAlt } from "react-icons/bi";
 import { avatar, formatPrice, imgSrc } from "@/app/_components/format";
 
 import { Avatar } from "flowbite-react";
+import getTicketPrice from "@/app/_components/checkPromo";
 
 export default function EventDetails() {
   dayjs.extend(relativeTime);
@@ -36,6 +37,8 @@ export default function EventDetails() {
       fetchEventData();
     }
   }, [eventId]);
+
+  const checkPromo = getTicketPrice(eventData);
 
   const handleBuyTicket = () => {
     if (eventData?.ticket_available && eventId) {
@@ -131,15 +134,22 @@ export default function EventDetails() {
                   <p className="font-semibold text-xl">Free</p>
                 ) : (
                   <>
-                    {eventData.promotion ? (
-                      <p className="font-semibold text-xl">
-                        Rp {formatPrice(eventData.promo_price)}
-                      </p>
-                    ) : (
-                      <p className="font-semibold text-xl">
-                        Rp {formatPrice(eventData.ticket_price)}
-                      </p>
-                    )}
+                    <p className="font-semibold text-xl">
+                      Rp {formatPrice(checkPromo)}
+                      <div className="text-sm font-normal text-gray-500">
+                        {checkPromo === eventData.promo_price && (
+                          <>
+                            <div className="line-through text-base">
+                              Rp {formatPrice(eventData.ticket_price)}
+                            </div>
+                            <p className="text-red-600">
+                              Promo until{" "}
+                              {dayjs(eventData.end_promo).format("DD MMMM")}
+                            </p>
+                          </>
+                        )}
+                      </div>
+                    </p>
                   </>
                 )}
               </div>

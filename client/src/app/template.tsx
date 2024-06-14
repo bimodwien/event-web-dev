@@ -16,6 +16,7 @@ export default function ResponsiveNavWrapper({ children }: Props) {
     pathname === "/reset-password" ||
     pathname === "/verification" ||
     pathname === "/reset-token" ||
+    pathname === "/edit-profile" ||
     pathname === "/dashboard/create-event" ||
     pathname.startsWith("/dashboard/");
 

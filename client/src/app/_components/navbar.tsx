@@ -93,6 +93,14 @@ const Navbar = () => {
                 </li>
                 <li>
                   <Link
+                    href={"/payment"}
+                    className="block px-4 py-2 text-white hover:bg-gray-600 text-sm hover:cursor-pointer"
+                  >
+                    My Payment
+                  </Link>
+                </li>
+                <li>
+                  <Link
                     href={"/edit-profile"}
                     className="block px-4 py-2 text-sm  hover:bg-gray-600 text-white"
                   >

@@ -3,6 +3,7 @@ import prisma from "../lib/prisma";
 import { MaxBuy, Status } from "@prisma/client";
 import sharp from "sharp";
 import { TTransaction } from "../models/transaction.model";
+import { setTimeout } from "timers";
 
 class TransactionService {
   async getAll(req: Request) {
@@ -60,7 +61,20 @@ class TransactionService {
     const { eventId } = req.params;
     const data = await prisma.transaction.findMany({
       where: { eventId: eventId },
-      orderBy: { createdAt: "desc" },
+      select: {
+        id: true,
+        no_inv: true,
+        paid_at: true,
+        createdAt: true,
+        status: true,
+        total_price: true,
+        total_ticket: true,
+        eventId: true,
+        user: {
+          select: { id: true, name: true, username: true },
+        },
+      },
+      orderBy: { updatedAt: "desc" },
     });
 
     return data;
@@ -137,6 +151,170 @@ class TransactionService {
       .padStart(4, "0");
     return `${timestamp}${randomDigits}`;
   }
+
+  // async create(req: Request) {
+  //   const { eventId } = req.params;
+
+  //   const { total_ticket, point, voucher } = req.body as TTransaction;
+  //   let status: Status = "pending";
+  //   const no_inv = this.generateInvoiceNumber();
+
+  //   const parsedTotalTicket = Number(total_ticket);
+
+  //   if (isNaN(parsedTotalTicket) || parsedTotalTicket < 1) {
+  //     throw new Error("Masukkan jumlah tiket yang valid");
+  //   }
+
+  //   if (!req.user || !req.user.id) {
+  //     throw new Error("User not authenticated or user ID not available");
+  //   }
+
+  //   req.body.total_ticket = parsedTotalTicket;
+
+  //   const event = await prisma.event.findUnique({ where: { id: eventId } });
+  //   if (!event) throw new Error("Invalid event");
+
+  //   const maxBuy: { [key in MaxBuy]: number } = {
+  //     one: 1,
+  //     two: 2,
+  //     three: 3,
+  //     four: 4,
+  //     five: 5,
+  //   };
+
+  //   const limit = maxBuy[event.max_buy as MaxBuy];
+
+  //   // harus input jumlah tiket yang dibeli
+
+  //   // console.log(typeof total_ticket);
+
+  //   // input jumlah tiket sesuai stock
+  //   if (parsedTotalTicket > event.ticket_available) {
+  //     throw new Error("jumlah tiket melebihi stock tersedia");
+  //   }
+  //   if (parsedTotalTicket > limit) {
+  //     // jumlah tiket tidak lebih dari max buy
+  //     throw new Error("Jumlah tiket melebihi batas pembelian");
+  //   }
+
+  //   let totalPrice: number;
+  //   let checkPrice: number;
+
+  //   const currentDate = new Date();
+  //   if (
+  //     event.promotion &&
+  //     event.start_promo &&
+  //     event.end_promo &&
+  //     currentDate > event.start_promo &&
+  //     currentDate < event.end_promo
+  //   ) {
+  //     checkPrice = event.promo_price ?? 0;
+  //   } else {
+  //     checkPrice = event.ticket_price ?? 0;
+  //   }
+
+  //   // console.log("check price: ", checkPrice);
+
+  //   totalPrice = parsedTotalTicket * checkPrice;
+
+  //   // console.log("total price: ", totalPrice);
+
+  //   // kalo type free maka price 0 & ga bisa pakai point/voucher
+  //   if (event.type === "free") {
+  //     //   totalPrice = 0;
+  //     if (point || voucher) {
+  //       throw new Error("point and voucher can't be use in this type event");
+  //     }
+  //     // console.log("price free", totalPrice);
+  //   }
+
+  //   // kalo type paid maka price = tiket price / promo price
+  //   // pakai point / voucher *salah satu
+  //   else if (event.type === "paid") {
+  //     if (voucher && point) {
+  //       throw new Error("please only chose one");
+  //     } else if (voucher) {
+  //       const checkVoucher = await prisma.voucher.findFirst({
+  //         where: { userId: req.user.id, isUsed: false },
+  //       });
+
+  //       if (!checkVoucher || checkVoucher.ammount === 0) {
+  //         throw new Error("You have no voucher available");
+  //       }
+
+  //       const voucherPrice = totalPrice * 0.1;
+  //       totalPrice -= voucherPrice;
+  //       // console.log("voucher: ", totalPrice);
+
+  //       await prisma.voucher.update({
+  //         where: { userId: req.user.id },
+  //         data: {
+  //           isUsed: true,
+  //           ammount: 0,
+  //         },
+  //       });
+  //     } else if (point) {
+  //       // console.log(req.user.point);
+  //       // console.log(req.user.pointExpiredDate);
+
+  //       if (!req.user?.point || req.user?.point === 0) {
+  //         throw new Error("point not available");
+  //       }
+  //       if (
+  //         req.user.pointExpiredDate &&
+  //         req.user.pointExpiredDate < currentDate
+  //       ) {
+  //         throw new Error("Point has expired");
+  //       }
+
+  //       if (req.user.point) {
+  //         if (totalPrice <= req.user.point) {
+  //           const newPoint = req.user.point - totalPrice;
+  //           totalPrice = 0;
+  //           await prisma.user.update({
+  //             where: { id: req.user.id },
+  //             data: { point: newPoint },
+  //           });
+  //         } else {
+  //           if (totalPrice !== 0) {
+  //             totalPrice = parsedTotalTicket * checkPrice - req.user.point;
+  //             await prisma.user.update({
+  //               where: { id: req.user.id },
+  //               data: { point: 0, pointExpiredDate: currentDate },
+  //             });
+  //           } else {
+  //             throw new Error("point not available");
+  //           }
+  //         }
+  //         // console.log("price point: ", totalPrice);
+  //       }
+  //     }
+  //   }
+
+  //   if (totalPrice === 0) {
+  //     status = "paid";
+  //   }
+  //   const transaction = await prisma.$transaction([
+  //     prisma.event.update({
+  //       where: { id: eventId },
+  //       data: {
+  //         ticket_available: event.ticket_available - total_ticket,
+  //       },
+  //     }),
+  //     prisma.transaction.create({
+  //       data: {
+  //         eventId: eventId,
+  //         userId: req.user.id,
+  //         total_ticket: parsedTotalTicket,
+  //         total_price: totalPrice,
+  //         status: status,
+  //         no_inv: no_inv,
+  //       },
+  //     }),
+  //   ]);
+
+  //   return transaction;
+  // }
 
   async create(req: Request) {
     const { eventId } = req.params;
@@ -240,31 +418,38 @@ class TransactionService {
           },
         });
       } else if (point) {
-        // console.log(req.user.point);
+        console.log(req.user.point);
         // console.log(req.user.pointExpiredDate);
 
         if (!req.user?.point || req.user?.point === 0) {
           throw new Error("point not available");
         }
-        if (req.user.point) {
-          if (totalPrice <= req.user.point) {
-            const newPoint = req.user.point - totalPrice;
-            totalPrice = 0;
+        if (
+          req.user.pointExpiredDate &&
+          req.user.pointExpiredDate < currentDate
+        ) {
+          throw new Error("Point has expired");
+        }
+
+        // if (req.user.point) {
+        if (totalPrice <= req.user.point) {
+          const newPoint = req.user.point - totalPrice;
+          totalPrice = 0;
+          await prisma.user.update({
+            where: { id: req.user.id },
+            data: { point: newPoint },
+          });
+        } else {
+          if (totalPrice !== 0) {
+            totalPrice = parsedTotalTicket * checkPrice - req.user.point;
             await prisma.user.update({
               where: { id: req.user.id },
-              data: { point: newPoint },
+              data: { point: 0 },
             });
           } else {
-            if (totalPrice !== 0) {
-              totalPrice = parsedTotalTicket * checkPrice - req.user.point;
-              await prisma.user.update({
-                where: { id: req.user.id },
-                data: { point: 0, pointExpiredDate: currentDate },
-              });
-            } else {
-              throw new Error("point not available");
-            }
+            throw new Error("point not available");
           }
+          // }
           // console.log("price point: ", totalPrice);
         }
       }
@@ -291,6 +476,54 @@ class TransactionService {
         },
       }),
     ]);
+
+    // Set timeout for payment proof upload
+    const timeoutDuration = 1 * 60 * 1000; // 15 minutes in milliseconds
+    const transactionId = transaction[1].id;
+
+    setTimeout(async () => {
+      try {
+        const transaction = await prisma.transaction.findUnique({
+          where: { id: transactionId },
+          include: { user: true, event: true },
+        });
+
+        if (transaction && transaction.status === "pending") {
+          await prisma.transaction.update({
+            where: { id: transactionId },
+            data: { status: "cancelled" },
+          });
+
+          if (point) {
+            if (event.ticket_price === null) {
+              throw new Error("Ticket price is null");
+            }
+            const usedPoints =
+              transaction.total_ticket * event.ticket_price -
+              transaction.total_price;
+            await prisma.user.update({
+              where: { id: transaction.userId },
+              data: { point: { increment: usedPoints } }, // Increment the user's point by the total points used in the transaction
+            });
+          } else if (voucher) {
+            await prisma.voucher.update({
+              where: { userId: transaction.userId },
+              data: {
+                isUsed: false,
+                ammount: 10,
+              },
+            });
+          }
+
+          await prisma.event.update({
+            where: { id: transaction.eventId },
+            data: { ticket_available: { increment: transaction.total_ticket } },
+          });
+        }
+      } catch (error) {
+        console.error("Error occurred during transaction cancellation:", error);
+      }
+    }, timeoutDuration);
 
     return transaction;
   }
@@ -359,6 +592,15 @@ class TransactionService {
     return await prisma.transaction.delete({
       where: { id: transactionId },
     });
+  }
+
+  async renderProof(req: Request) {
+    const data = await prisma.transaction.findUnique({
+      where: {
+        id: req.params.id,
+      },
+    });
+    return data?.paid_proof;
   }
 }
 

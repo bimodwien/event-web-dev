@@ -27,12 +27,12 @@ const EventPromotor = () => {
   }, []);
 
   return (
-    <div className="grid grid-cols-3 gap-5 p-10">
+    <div className="max-w-screen-2xl w-full flex flex-wrap gap-5 py-5 justify-center">
       {eventData?.map((event) => (
         <Link
           href={`/dashboard/my-event/${event.id}`}
           key={event.id}
-          className="flex flex-col rounded-lg w-60 overflow-hidden shadow"
+          className="flex md:flex-col md:justify-between rounded-lg w-full md:w-56 overflow-hidden shadow bg-white"
         >
           <img
             src={`${imgSrc}${event.id}`}

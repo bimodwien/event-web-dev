@@ -4,10 +4,10 @@ import { IoAdd } from "react-icons/io5";
 const NavDashboard = () => {
   return (
     <nav className=" border-gray-200">
-      <div className="flex gap-5 w-full justify-between">
-        <div>
+      <div className="flex gap-5 w-full justify-end">
+        {/* <div>
           <p>Page Name</p>
-        </div>
+        </div> */}
         <div>
           <a
             href="/dashboard/create-event"

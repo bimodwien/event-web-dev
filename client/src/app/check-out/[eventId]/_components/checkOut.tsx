@@ -12,24 +12,25 @@ import { FaCoins } from "react-icons/fa";
 import { MdDiscount } from "react-icons/md";
 import { TUser } from "@/models/user.model";
 import PointVoucher from "@/models/pointVoucher.model";
+import getTicketPrice from "@/app/_components/checkPromo";
 
-interface Params {
-  eventId: string;
-}
+// interface Params {
+//   eventId: string;
+// }
 
-const getTicketPrice = (eventData: TEvent | undefined): number => {
-  if (!eventData) return 0;
+// const getTicketPrice = (eventData: TEvent | undefined): number => {
+//   if (!eventData) return 0;
 
-  const currentDate = new Date();
-  const isPromoActive =
-    eventData.promotion &&
-    eventData.start_promo &&
-    eventData.end_promo &&
-    currentDate > new Date(eventData.start_promo) &&
-    currentDate < new Date(eventData.end_promo);
+//   const currentDate = new Date();
+//   const isPromoActive =
+//     eventData.promotion &&
+//     eventData.start_promo &&
+//     eventData.end_promo &&
+//     currentDate > new Date(eventData.start_promo) &&
+//     currentDate < new Date(eventData.end_promo);
 
-  return isPromoActive ? eventData.promo_price : eventData.ticket_price;
-};
+//   return isPromoActive ? eventData.promo_price : eventData.ticket_price;
+// };
 
 const Transaction = () => {
   dayjs.extend(relativeTime);
@@ -89,6 +90,8 @@ const Transaction = () => {
       ? 5
       : 1;
 
+  const checkPromo = getTicketPrice(eventData);
+
   const increment = () => {
     if (ticketCount < limit) {
       setTicketCount((prevCount) => prevCount + 1);
@@ -133,7 +136,11 @@ const Transaction = () => {
       setVoucher(false);
     }
     if (!point) {
-      setTotalPrice(ticketPrice - (pointVoucher?.point?.point || 0));
+      if ((pointVoucher?.point?.point || 0) <= ticketPrice) {
+        setTotalPrice(ticketPrice - (pointVoucher?.point?.point || 0));
+      } else {
+        setTotalPrice(0);
+      }
     } else {
       setTotalPrice(ticketPrice);
     }
@@ -206,7 +213,7 @@ const Transaction = () => {
               <div className="flex justify-between gap-2 items-center">
                 <p className="font-semibold text-xl">Ticket Details: </p>
                 <div className="flex gap-5 items-center">
-                  {eventData.promotion ? (
+                  {/* {eventData.promotion ? (
                     <p className="font-semibold text-lg">
                       Rp {formatPrice(eventData.promo_price)}
                     </p>
@@ -214,7 +221,10 @@ const Transaction = () => {
                     <p className="font-semibold text-lg">
                       Rp {formatPrice(eventData.ticket_price)}
                     </p>
-                  )}
+                  )} */}
+                  <p className="font-semibold text-lg">
+                    Rp {formatPrice(checkPromo)}
+                  </p>
 
                   <div className="flex items-center gap-2 rounded-lg border-2 border-gray-300 bg-white">
                     <button

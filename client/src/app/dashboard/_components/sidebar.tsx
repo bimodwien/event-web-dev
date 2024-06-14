@@ -8,7 +8,7 @@ const Sidebar = () => {
   const user = useAppSelector((state) => state.auth);
 
   return (
-    <nav className=" border-gray-200 bg-gray-900  left-0 h-screen w-64">
+    <nav className=" border-gray-200 bg-gray-900  left-0 h-screen w-52">
       <div className="flex flex-col justify-between h-full">
         <div className="flex flex-col gap-5 w-full">
           <Link
@@ -54,8 +54,8 @@ const Sidebar = () => {
             </div>
           </div>
         </div>
-        <div className="flex items-center px-5 pb-4 gap-4">
-          <div>
+        <div className="flex flex-col px-5 pb-4 gap-4">
+          <div className="flex items-start">
             <Avatar
               img={
                 user.avatarUrl

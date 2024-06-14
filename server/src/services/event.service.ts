@@ -75,6 +75,11 @@ class EventService {
       filtering.city = city as City;
     }
 
+    const currentDate = new Date();
+    filtering.end_event = {
+      gte: currentDate,
+    };
+
     const skip = (page - 1) * limit;
 
     const data = await prisma.event.findMany({
@@ -90,6 +95,8 @@ class EventService {
         type: true,
         promotion: true,
         category: true,
+        start_promo: true,
+        end_promo: true,
         user: { select: { id: true, name: true, avatarUrl: true } },
       },
       orderBy: {
@@ -332,6 +339,7 @@ class EventService {
         const start_promo = new Date(req.body.start_promo);
         const end_promo = new Date(req.body.end_promo);
         const start_event = new Date(currentEvent.start_event);
+        console.log(start_event);
 
         if (start_promo > start_event) {
           throw new Error("promotion must start before the event start");
@@ -372,6 +380,16 @@ class EventService {
     }
     if (typeof data.end_promo === "string" || data.end_promo instanceof Date) {
       data.end_promo = new Date(data.end_promo);
+    }
+
+    if (
+      typeof data.start_event === "string" ||
+      data.start_event instanceof Date
+    ) {
+      data.start_event = new Date(data.start_event);
+    }
+    if (typeof data.end_event === "string" || data.end_event instanceof Date) {
+      data.end_event = new Date(data.end_event);
     }
 
     return await prisma.event.update({

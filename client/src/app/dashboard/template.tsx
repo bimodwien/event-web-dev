@@ -7,14 +7,11 @@ type Props = { children: React.ReactNode };
 export default function ResponsiveNavWrapper({ children }: Props) {
   const pathname: string = usePathname();
   const isOrganizer: boolean =
-    pathname === "/login" ||
-    pathname === "/register" ||
-    pathname === "/" ||
-    pathname === "/dashboard/create-event";
+    pathname === "/dashboard" || pathname === "/dashboard/my-event";
 
   return (
     <main>
-      {!isOrganizer && <NavDashboard />}
+      {isOrganizer && <NavDashboard />}
       {children}
     </main>
   );

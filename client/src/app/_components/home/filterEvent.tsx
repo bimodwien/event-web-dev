@@ -48,6 +48,7 @@ const EventList = () => {
   };
 
   dayjs.extend(relativeTime);
+  const currentDate = new Date();
 
   const handleNextPage = () => {
     setPage(page + 1);
@@ -71,27 +72,31 @@ const EventList = () => {
   }, [value, filterCity, filterCategory, page, limit]);
 
   return (
-    <div className="w-full flex">
-      <div className="px-5 py-10 flex flex-col gap-5 w-60 left-0 h-full">
-        <p className="font-semibold text-xl">Filter</p>
+    <div className="w-full flex md:flex-row flex-col">
+      <div className="p-3 gap-3 md:px-5 md:py-10 flex flex-col md:gap-5 w-full md:w-60 left-0 h-full">
+        <p className="font-semibold text-xl md:text-start text-center">
+          Filter
+        </p>
         <hr />
-        <CategorySelect value={filterCategory} onChange={setFilterCategory} />
-        <hr />
-        <CitySelect value={filterCity} onChange={setFilterCity} />
+        <div className="flex md:flex-col gap-5 md:gap-3 justify-center md:justify-normal">
+          <CategorySelect value={filterCategory} onChange={setFilterCategory} />
+          <hr className="hidden md:block" />
+          <CitySelect value={filterCity} onChange={setFilterCity} />
+        </div>
       </div>
       <div className="border-l border-gray-300 py-5 px-10 w-full flex flex-col justify-between">
         <SearchInput value={search} onChange={setSearch} />
-        <div className="grid max-w-screen-2xl w-full md:grid-cols-3 lg:grid-cols-4  grid-cols-2	gap-5 py-5 px-3">
+        <div className="max-w-screen-2xl w-full flex flex-wrap gap-5 py-5 justify-center">
           {event?.map((event) => (
             <Link
               href={`events/${event.id}`}
               key={event.id}
-              className="flex flex-col rounded-lg w-56 overflow-hidden shadow bg-white"
+              className="flex md:flex-col md:justify-between rounded-lg w-full md:w-56 overflow-hidden shadow bg-white"
             >
               <img
                 src={`${imgSrc}${event.id}`}
                 alt=""
-                className="w-full h-36 object-cover"
+                className="h-full w-36 md:w-full md:h-36 object-cover"
               />
               <div className="flex flex-col gap-2 py-2 px-4">
                 <p className="text-base font-semibold">{event.title}</p>
@@ -101,17 +106,29 @@ const EventList = () => {
                 {event.type === "free" ? (
                   <p className="font-semibold text-sm">Free</p>
                 ) : (
-                  <>
-                    {event.promotion ? (
-                      <p className="font-semibold text-sm">
-                        Rp {formatPrice(event.promo_price)}
-                      </p>
-                    ) : (
-                      <p className="font-semibold text-sm">
+                  <div className="md:flex gap-1">
+                    <p className="font-semibold text-sm">
+                      Rp{" "}
+                      {formatPrice(
+                        event.promotion &&
+                          event.start_promo &&
+                          event.end_promo &&
+                          currentDate > new Date(event.start_promo) &&
+                          currentDate < new Date(event.end_promo)
+                          ? event.promo_price
+                          : event.ticket_price
+                      )}
+                    </p>
+                    {event.promotion &&
+                    event.start_promo &&
+                    event.end_promo &&
+                    currentDate > new Date(event.start_promo) &&
+                    currentDate < new Date(event.end_promo) ? (
+                      <span className="text-sm text-gray-500 line-through">
                         Rp {formatPrice(event.ticket_price)}
-                      </p>
-                    )}
-                  </>
+                      </span>
+                    ) : null}
+                  </div>
                 )}
 
                 <hr className="mt-5" />
@@ -139,7 +156,7 @@ const EventList = () => {
             </p>
           </div>
         )}
-        <div className="flex items-center justify-between gap-5">
+        <div className="flex items-center justify-between gap-5 flex-wrap">
           <div className="flex gap-2 items-center">
             <label htmlFor="limit" className="font-semibold">
               Show:

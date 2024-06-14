@@ -27,18 +27,26 @@ class TransactionRouter {
       verifyCustomer,
       transactionController.getPaymentByBuyer
     );
-    this.router.get(
-      "/:transactionId",
-      validateToken,
-      verifyCustomer,
-      transactionController.getDetail
-    );
 
     this.router.get(
       "/point-voucher",
       validateToken,
       verifyCustomer,
       transactionController.getPointVoucher
+    );
+
+    this.router.get(
+      "/event/:eventId",
+      validateToken,
+      verifyEventOrganizer,
+      transactionController.getByEventId
+    );
+
+    this.router.get(
+      "/:transactionId",
+      validateToken,
+      verifyCustomer,
+      transactionController.getDetail
     );
 
     this.router.post(
@@ -54,6 +62,7 @@ class TransactionRouter {
       verifyCustomer,
       transactionController.getDetailByCustomer
     );
+    this.router.get("/proof/:id", transactionController.renderProof);
 
     // this.router.post(
     //   "/:eventId",
@@ -61,7 +70,6 @@ class TransactionRouter {
     //   verifyCustomer,
     //   transactionController.createTransaction
     // );
-
 
     this.router.patch(
       "/:transactionId",

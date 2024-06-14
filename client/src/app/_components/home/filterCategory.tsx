@@ -5,7 +5,7 @@ interface CategorySelectProps {
 
 const CategorySelect: React.FC<CategorySelectProps> = ({ value, onChange }) => {
   return (
-    <div className="flex flex-col gap-1">
+    <div className="flex gap-3 md:flex-col md:gap-1 items-center md:items-start">
       <label htmlFor="category" className="font-semibold">
         Category
       </label>
