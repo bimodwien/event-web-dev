@@ -207,6 +207,20 @@ class EventService {
     let eventPrice;
     let discountPrice = null;
 
+    const currentDate = new Date();
+    const startEvent = new Date(start_event);
+    const endEvent = new Date(end_event);
+
+    if (startEvent && endEvent) {
+      if (currentDate > startEvent) {
+        throw new Error("wrong input start event");
+      } else if (currentDate > endEvent) {
+        throw new Error("wrong input end event");
+      } else if (startEvent > endEvent) {
+        throw new Error("event must start before end");
+      }
+    }
+
     if (type === "free") {
       eventPrice = 0;
       if (promotion || start_promo || end_promo) {
@@ -253,8 +267,8 @@ class EventService {
       city,
       location,
       address,
-      start_event: new Date(start_event).toISOString(),
-      end_event: new Date(end_event),
+      start_event: startEvent,
+      end_event: endEvent,
       description,
       terms_conditions,
       image: buffer,

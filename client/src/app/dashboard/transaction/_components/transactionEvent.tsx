@@ -24,6 +24,7 @@ export default function TransactionEvent() {
       console.log(response.data, "ini response");
       setTransactions(data);
       // console.log(data);
+      console.log(eventId);
     } catch (error) {
       console.error("Error fetching event data:", error);
     }
@@ -35,7 +36,6 @@ export default function TransactionEvent() {
 
   return (
     <div className="p-10">
-      <p></p>
       <table className="min-w-full divide-y divide-gray-200 rounded-lg overflow-hidden">
         <thead className="bg-gray-200 px-1 py-3 text-center">
           <tr>

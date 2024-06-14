@@ -67,6 +67,10 @@ const EventReview = ({ event }: { event: any }) => {
               {event.event.title}
             </div>
             <div>total ({event.total_ticket}) ticket </div>
+            <div>
+              {event.event.location}, {event.event.city}
+            </div>
+            <div>{event.event.address}</div>
             <div className="flex gap-3 text-4xl font-medium text-yellow-200">
               {stars.map((star, index) => (
                 <StarComponent
